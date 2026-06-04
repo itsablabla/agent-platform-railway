@@ -15,9 +15,39 @@ You are creating a new agent in this AgentOS template. The user already has the 
 
 ## 0. Preconditions
 
-- Live container reachable: `curl -sSf http://localhost:8000/health` returns 200. (`docker compose ps` is unreliable from worktrees or alternate clones — trust the health probe.)
+Check if the container is running:
 
-If it isn't reachable, ask the user to run `docker compose up -d --build` and wait for it to come up.
+```bash
+curl -sSf http://localhost:8000/health
+```
+
+If it returns 200, proceed to Step 1.
+
+If it fails (connection refused, timeout), **ask the user via `AskUserQuestion`**:
+
+> The agentos-api container isn't running. Want me to start it?
+> - **Yes, start it** — I'll run `docker compose up -d --build` and wait for it
+> - **No, I'll handle it** — I'll start it myself or fix the issue first
+
+If the user says yes:
+
+```bash
+docker compose up -d --build
+```
+
+Then poll until healthy (timeout after 120s):
+
+```bash
+timeout 120 bash -c 'until curl -sSf http://localhost:8000/health > /dev/null 2>&1; do sleep 2; done'
+```
+
+If it times out, surface the logs and stop:
+
+```bash
+docker logs agentos-api --tail 30
+```
+
+Common issues: missing `.env` file, port 8000 in use, Docker not running.
 
 ## 1. Ask the user
 
