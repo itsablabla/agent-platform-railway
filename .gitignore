@@ -63,7 +63,8 @@ Thumbs.db
 # Project-specific
 # =========================
 tmp
-.claude
+.claude/
+!.claude/skills/
 
 # Optional: local PyPI creds (uncomment if you ever create it)
 # .pypirc
