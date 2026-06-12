@@ -13,7 +13,7 @@ from agno.tools import tool
 
 from app.settings import default_model
 from db import assistant_knowledge, get_postgres_db
-from agents.tools import composio_tools, web_tools
+from agents.tools import ALL_MCP_TOOLS
 
 
 ADMIN_OPS_INSTRUCTIONS = """\
@@ -41,8 +41,20 @@ admin_ops = Agent(
     name="AdminOps",
     model=default_model(),
     db=get_postgres_db(),
-    tools=[delete_resource, web_tools, composio_tools],
-    instructions=ADMIN_OPS_INSTRUCTIONS,
+    tools=[delete_resource, *ALL_MCP_TOOLS],
+    instructions="""\
+You are AdminOps. You help operators run privileged maintenance tasks.
+
+When the user asks to delete a resource, call ``delete_resource``. The
+request will pause for human approval — do not retry; wait for the
+operator to approve or reject from the AgentOS Control Plane.
+
+You also have access to:
+- **Web Search** tools for finding information
+- **Composio** tools for SaaS integrations
+- **E2B** code execution for running scripts
+- **1Password** for secure credential management
+""",
     knowledge=assistant_knowledge,
     search_knowledge=True,
     enable_agentic_memory=True,

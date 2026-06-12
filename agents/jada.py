@@ -10,7 +10,7 @@ from agno.agent import Agent
 
 from agents.admin_ops import delete_resource
 from agents.code_search import codebase_context
-from agents.tools import composio_tools, web_tools
+from agents.tools import ALL_MCP_TOOLS
 from app.settings import default_model
 from db import assistant_knowledge, get_postgres_db
 
@@ -35,10 +35,9 @@ jada = Agent(
     model=default_model(model_id="claude-sonnet-4-5-20250929"),
     db=get_postgres_db(),
     tools=[
-        web_tools,
         *codebase_context.get_tools(),
         delete_resource,
-        composio_tools,
+        *ALL_MCP_TOOLS,
     ],
     instructions=JADA_INSTRUCTIONS,
     knowledge=assistant_knowledge,

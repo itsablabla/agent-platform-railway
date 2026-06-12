@@ -14,7 +14,7 @@ from agno.agent import Agent
 
 from app.settings import default_model
 from db import assistant_knowledge, get_postgres_db
-from agents.tools import composio_tools, web_tools
+from agents.tools import ALL_MCP_TOOLS
 
 
 COMPOSIO_INSTRUCTIONS = """\
@@ -33,7 +33,7 @@ composio_agent = Agent(
     name="Composio",
     model=default_model(),
     db=get_postgres_db(),
-    tools=[web_tools, composio_tools],
+    tools=ALL_MCP_TOOLS,
     instructions=COMPOSIO_INSTRUCTIONS,
     knowledge=assistant_knowledge,
     search_knowledge=True,
