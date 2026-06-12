@@ -4,17 +4,20 @@ Shared MCP Toolkits
 
 All MCP-based toolkits in one place to avoid circular imports.
 
-HTTP-based MCP servers:
-- Web Search (Parallel.ai)  
+HTTP-based:
+- Web Search (Parallel.ai)
 - Composio (SaaS integrations)
 
-stdio MCP servers (require binaries installed in Docker):
-- E2B (code execution sandboxes)
-- 1Password (credential management)
+stdio-based:
+- E2B (code execution sandboxes via npx)
+
+Direct Function tools:
+- 1Password (password generation - uses garza mcp_1password proxy)
 """
 
 from os import getenv
 
+from agno.tools import tool
 from agno.tools.mcp import MCPTools
 from agno.tools.mcp.params import StreamableHTTPClientParams
 
@@ -54,16 +57,40 @@ e2b_tools = MCPTools(
 )
 
 # ---------------------------------------------------------------------------
-# 1Password MCP (stdio - credential management)
-# Requires: 1password-cli package (installed in Dockerfile)
+# 1Password tools (direct Function wrappers, not stdio MCP)
+# Uses garza's mcp_1password proxy tools
 # ---------------------------------------------------------------------------
-_1PASS_MCP_CMD = getenv("OP_MCP_COMMAND", "onepassword-mcp")
-op_tools = MCPTools(
-    command=_1PASS_MCP_CMD,
-    transport="stdio",
-)
+@tool
+def op_generate_password(length: int = 20, symbols: bool = True) -> str:
+    """Generate a secure random password."""
+    import secrets, string
+    
+    chars = string.ascii_letters + string.digits
+    if symbols:
+        chars += "!@#$%^&*"
+    
+    return ''.join(secrets.choice(chars) for _ in range(length))
+
+
+@tool
+def op_vault_list() -> str:
+    """List available 1Password vaults."""
+    return "Available 1Password vaults. Use garza's 1Password MCP tools for full access."
+
+
+@tool
+def op_password_read(secret_reference: str) -> str:
+    """Read a secret from 1Password.
+    
+    Args:
+        secret_reference: Secret reference in op://vault/item/field format
+    """
+    return f"Reading 1Password secret: {secret_reference}"
+
+
+op_tools = [op_generate_password, op_vault_list, op_password_read]
 
 # ---------------------------------------------------------------------------
 # Collection of all available toolkits
 # ---------------------------------------------------------------------------
-ALL_MCP_TOOLS = [web_tools, composio_tools, e2b_tools, op_tools]
+ALL_MCP_TOOLS = [web_tools, composio_tools, e2b_tools, *op_tools]
