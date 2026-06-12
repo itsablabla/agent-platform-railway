@@ -9,7 +9,7 @@ from agno.agent import Agent
 from agno.context.workspace import WorkspaceContextProvider
 
 from app.settings import default_model
-from db import get_postgres_db
+from db import assistant_knowledge, get_postgres_db
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -39,7 +39,10 @@ code_search = Agent(
     db=get_postgres_db(),
     tools=codebase_context.get_tools(),
     instructions=CODE_SEARCH_INSTRUCTIONS + "\n\n" + codebase_context.instructions(),
+    knowledge=assistant_knowledge,
+    search_knowledge=True,
     enable_agentic_memory=True,
+    enable_user_memories=True,
     add_datetime_to_context=True,
     add_history_to_context=True,
     num_history_runs=5,

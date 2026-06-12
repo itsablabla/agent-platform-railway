@@ -10,7 +10,11 @@ from pathlib import Path
 from agno.os import AgentOS
 from agno.utils.log import log_info
 
+from agents.admin_ops import admin_ops
+from agents.claude_opus import claude_opus_agent
 from agents.code_search import code_search
+from agents.gpt_55 import gpt55_agent
+from agents.kimi import kimi_agent
 from agents.web_search import web_search
 from db import get_postgres_db
 
@@ -64,11 +68,19 @@ agent_os = AgentOS(
     name="AgentOS",
     tracing=True,
     scheduler=True,
+    scheduler_poll_interval=15,
     scheduler_base_url=scheduler_base_url,
     authorization=runtime_env == "prd",
     lifespan=lifespan,
     db=get_postgres_db(),
-    agents=[web_search, code_search],
+    agents=[
+        web_search,
+        code_search,
+        admin_ops,
+        claude_opus_agent,
+        gpt55_agent,
+        kimi_agent,
+    ],
     interfaces=interfaces,
     config=str(Path(__file__).parent / "config.yaml"),
 )
