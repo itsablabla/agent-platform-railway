@@ -58,19 +58,15 @@ if SLACK_BOT_TOKEN and SLACK_SIGNING_SECRET:
 async def lifespan(app):  # type: ignore[no-untyped-def]
     log_info("AgentOS lifespan: startup")
     
-    # Eagerly initialize MCP toolkits so tools appear in the registry immediately
-    mcp_toolkits = []
-    for agent in [web_search, code_search, admin_ops, composio_agent, claude_opus_agent, gpt55_agent, kimi_agent]:
+    # Eagerly connect MCP toolkits so tools are ready immediately
+    for agent in [web_search, code_search, admin_ops, composio_agent, jada, claude_opus_agent, gpt55_agent, kimi_agent]:
         for tool in getattr(agent, "tools", []):
-            if hasattr(tool, "connect") and callable(getattr(tool, "connect")) and tool not in mcp_toolkits:
-                mcp_toolkits.append(tool)
-    
-    for toolkit in mcp_toolkits:
-        try:
-            await toolkit.connect()
-            log_info(f"MCP toolkit connected: {toolkit.name}")
-        except Exception as e:
-            log_info(f"MCP toolkit connection skipped: {toolkit.name} ({e})")
+            if tool and hasattr(tool, "connect") and callable(getattr(tool, "connect")):
+                try:
+                    await tool.connect()
+                    log_info(f"MCP connected: {getattr(tool, 'name', tool.__class__.__name__)}")
+                except Exception as e:
+                    log_info(f"MCP skipped: {getattr(tool, 'name', tool.__class__.__name__)} — {e}")
     
     try:
         yield
