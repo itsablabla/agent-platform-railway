@@ -10,6 +10,7 @@ from agno.context.workspace import WorkspaceContextProvider
 
 from app.settings import default_model
 from db import assistant_knowledge, get_postgres_db
+from agents.composio import composio_tools
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -29,6 +30,10 @@ You answer questions about your own codebase. Be specific and concrete:
 quote real file paths and line numbers from the codebase, never guess.
 If a question is off-topic or not answered by the project's files, say
 so plainly and offer to take a codebase question instead.
+
+You also have access to Composio tools for interacting with connected
+SaaS accounts (Gmail, Slack, GitHub, Notion, etc.). Use these when the
+user asks you to perform actions on their connected services.
 """
 
 
@@ -37,7 +42,7 @@ code_search = Agent(
     name="CodeSearch",
     model=default_model(),
     db=get_postgres_db(),
-    tools=codebase_context.get_tools(),
+    tools=[*codebase_context.get_tools(), composio_tools],
     instructions=CODE_SEARCH_INSTRUCTIONS + "\n\n" + codebase_context.instructions(),
     knowledge=assistant_knowledge,
     search_knowledge=True,

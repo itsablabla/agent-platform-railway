@@ -13,6 +13,7 @@ from agno.tools import tool
 
 from app.settings import default_model
 from db import assistant_knowledge, get_postgres_db
+from agents.composio import composio_tools
 
 
 ADMIN_OPS_INSTRUCTIONS = """\
@@ -21,6 +22,10 @@ You are AdminOps. You help operators run privileged maintenance tasks.
 When the user asks to delete a resource, call ``delete_resource``. The
 request will pause for human approval — do not retry; wait for the
 operator to approve or reject from the AgentOS Control Plane.
+
+You also have access to Composio tools for interacting with connected
+SaaS accounts (Gmail, Slack, GitHub, Notion, etc.). Use these when the
+user asks you to perform actions on their connected services.
 """
 
 
@@ -36,7 +41,7 @@ admin_ops = Agent(
     name="AdminOps",
     model=default_model(),
     db=get_postgres_db(),
-    tools=[delete_resource],
+    tools=[delete_resource, composio_tools],
     instructions=ADMIN_OPS_INSTRUCTIONS,
     knowledge=assistant_knowledge,
     search_knowledge=True,
