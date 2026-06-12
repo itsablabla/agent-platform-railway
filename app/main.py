@@ -15,6 +15,7 @@ from agents.claude_opus import claude_opus_agent
 from agents.code_search import code_search
 from agents.composio import composio_agent
 from agents.gpt_55 import gpt55_agent
+from agents.jada import jada
 from agents.kimi import kimi_agent
 from agents.web_search import web_search
 from db import get_postgres_db
@@ -93,6 +94,7 @@ agent_os = AgentOS(
         web_search,
         code_search,
         admin_ops,
+        jada,
         composio_agent,
         claude_opus_agent,
         gpt55_agent,
