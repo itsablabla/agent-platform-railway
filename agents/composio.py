@@ -18,6 +18,7 @@ from agno.tools.mcp.params import StreamableHTTPClientParams
 
 from app.settings import default_model
 from db import assistant_knowledge, get_postgres_db
+from agents.web_search import web_tools
 
 COMPOSIO_MCP_URL = "https://connect.composio.dev/mcp"
 COMPOSIO_API_KEY = getenv("COMPOSIO_API_KEY", "")
@@ -48,7 +49,7 @@ composio_agent = Agent(
     name="Composio",
     model=default_model(),
     db=get_postgres_db(),
-    tools=[composio_tools],
+    tools=[web_tools, composio_tools],
     instructions=COMPOSIO_INSTRUCTIONS,
     knowledge=assistant_knowledge,
     search_knowledge=True,

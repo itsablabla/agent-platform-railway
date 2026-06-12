@@ -14,6 +14,7 @@ from agno.tools import tool
 from app.settings import default_model
 from db import assistant_knowledge, get_postgres_db
 from agents.composio import composio_tools
+from agents.web_search import web_tools
 
 
 ADMIN_OPS_INSTRUCTIONS = """\
@@ -41,7 +42,7 @@ admin_ops = Agent(
     name="AdminOps",
     model=default_model(),
     db=get_postgres_db(),
-    tools=[delete_resource, composio_tools],
+    tools=[delete_resource, web_tools, composio_tools],
     instructions=ADMIN_OPS_INSTRUCTIONS,
     knowledge=assistant_knowledge,
     search_knowledge=True,

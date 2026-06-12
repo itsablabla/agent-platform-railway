@@ -10,6 +10,7 @@ from agno.agent import Agent
 from app.settings import default_model
 from db import assistant_knowledge, get_postgres_db
 from agents.composio import composio_tools
+from agents.web_search import web_tools
 
 
 claude_opus_agent = Agent(
@@ -26,7 +27,7 @@ user asks you to perform actions on their connected services.
 """,
     knowledge=assistant_knowledge,
     search_knowledge=True,
-    tools=[composio_tools],
+    tools=[web_tools, composio_tools],
     enable_agentic_memory=True,
     enable_user_memories=True,
     add_datetime_to_context=True,
