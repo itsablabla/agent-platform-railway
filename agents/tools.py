@@ -4,12 +4,13 @@ Shared MCP Toolkits
 
 All MCP-based toolkits in one place to avoid circular imports.
 
-HTTP-based MCP servers (available immediately):
-- Web Search (Parallel.ai)
+HTTP-based MCP servers:
+- Web Search (Parallel.ai)  
 - Composio (SaaS integrations)
 
-NOTE: stdio MCP servers (E2B, 1Password) can be added when their binaries
-are installed in the Railway environment. See the MCP transport docs.
+stdio MCP servers (require binaries installed in Docker):
+- E2B (code execution sandboxes)
+- 1Password (credential management)
 """
 
 from os import getenv
@@ -43,6 +44,26 @@ composio_tools = MCPTools(
 )
 
 # ---------------------------------------------------------------------------
-# Collection of available toolkits
+# E2B MCP (stdio - runs code in secure sandboxes)
+# Requires: npm install -g @e2b/mcp-server (installed in Dockerfile)
 # ---------------------------------------------------------------------------
-ALL_MCP_TOOLS = [web_tools, composio_tools]
+e2b_tools = MCPTools(
+    command="npx -y @e2b/mcp-server",
+    transport="stdio",
+    env={"E2B_API_KEY": getenv("E2B_API_KEY", "")} if getenv("E2B_API_KEY") else None,
+)
+
+# ---------------------------------------------------------------------------
+# 1Password MCP (stdio - credential management)
+# Requires: 1password-cli package (installed in Dockerfile)
+# ---------------------------------------------------------------------------
+_1PASS_MCP_CMD = getenv("OP_MCP_COMMAND", "onepassword-mcp")
+op_tools = MCPTools(
+    command=_1PASS_MCP_CMD,
+    transport="stdio",
+)
+
+# ---------------------------------------------------------------------------
+# Collection of all available toolkits
+# ---------------------------------------------------------------------------
+ALL_MCP_TOOLS = [web_tools, composio_tools, e2b_tools, op_tools]
