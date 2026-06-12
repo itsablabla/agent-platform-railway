@@ -10,8 +10,7 @@ from agno.agent import Agent
 
 from agents.admin_ops import delete_resource
 from agents.code_search import codebase_context
-from agents.composio import composio_tools
-from agents.web_search import web_tools
+from agents.tools import composio_tools, web_tools
 from app.settings import default_model
 from db import assistant_knowledge, get_postgres_db
 

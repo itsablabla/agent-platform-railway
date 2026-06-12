@@ -10,8 +10,7 @@ from agno.context.workspace import WorkspaceContextProvider
 
 from app.settings import default_model
 from db import assistant_knowledge, get_postgres_db
-from agents.composio import composio_tools
-from agents.web_search import web_tools
+from agents.tools import composio_tools, web_tools
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 

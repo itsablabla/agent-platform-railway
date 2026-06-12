@@ -10,27 +10,11 @@ The Composio API key is read from COMPOSIO_API_KEY and sent on the
 ``x-consumer-api-key`` request header.
 """
 
-from os import getenv
-
 from agno.agent import Agent
-from agno.tools.mcp import MCPTools
-from agno.tools.mcp.params import StreamableHTTPClientParams
 
 from app.settings import default_model
 from db import assistant_knowledge, get_postgres_db
-from agents.web_search import web_tools
-
-COMPOSIO_MCP_URL = "https://connect.composio.dev/mcp"
-COMPOSIO_API_KEY = getenv("COMPOSIO_API_KEY", "")
-
-composio_tools = MCPTools(
-    url=COMPOSIO_MCP_URL,
-    transport="streamable-http",
-    server_params=StreamableHTTPClientParams(
-        url=COMPOSIO_MCP_URL,
-        headers={"x-consumer-api-key": COMPOSIO_API_KEY} if COMPOSIO_API_KEY else None,
-    ),
-)
+from agents.tools import composio_tools, web_tools
 
 
 COMPOSIO_INSTRUCTIONS = """\
