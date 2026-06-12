@@ -13,6 +13,7 @@ from agno.utils.log import log_info
 from agents.admin_ops import admin_ops
 from agents.claude_opus import claude_opus_agent
 from agents.code_search import code_search
+from agents.composio import composio_agent
 from agents.gpt_55 import gpt55_agent
 from agents.kimi import kimi_agent
 from agents.web_search import web_search
@@ -77,6 +78,7 @@ agent_os = AgentOS(
         web_search,
         code_search,
         admin_ops,
+        composio_agent,
         claude_opus_agent,
         gpt55_agent,
         kimi_agent,
