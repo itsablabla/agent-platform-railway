@@ -11,6 +11,7 @@ from agno.os import AgentOS
 from agno.utils.log import log_info
 
 from agents.admin_ops import admin_ops
+from agents.e2b_coder import e2b_coder
 from app.interfaces import Discord, Telegram
 from agents.claude_opus import claude_opus_agent
 from agents.code_search import code_search
@@ -68,7 +69,7 @@ async def lifespan(app):  # type: ignore[no-untyped-def]
     log_info("AgentOS lifespan: startup")
     
     # Eagerly connect MCP toolkits so tools are ready immediately
-    for agent in [web_search, code_search, admin_ops, composio_agent, jada, claude_opus_agent, gpt55_agent, kimi_agent, openrouter_agent]:
+    for agent in [web_search, code_search, admin_ops, composio_agent, jada, claude_opus_agent, gpt55_agent, kimi_agent, openrouter_agent, e2b_coder]:
         for tool in getattr(agent, "tools", []):
             if tool and hasattr(tool, "connect") and callable(getattr(tool, "connect")):
                 try:
@@ -111,6 +112,7 @@ agent_os = AgentOS(
         gpt55_agent,
         kimi_agent,
         openrouter_agent,
+        e2b_coder,
     ],
     interfaces=interfaces,
     config=str(Path(__file__).parent / "config.yaml"),
