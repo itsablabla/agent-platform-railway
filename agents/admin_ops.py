@@ -13,7 +13,6 @@ from agno.tools import tool
 
 from app.settings import default_model
 from db import assistant_knowledge, get_postgres_db
-from agents.tools import ALL_MCP_TOOLS
 from agents.agentos_api import AGENTOS_API_TOOLS
 
 
@@ -29,7 +28,7 @@ admin_ops = Agent(
     name="Agno IT Admin",
     model=default_model("kimi-k2-thinking"),
     db=get_postgres_db(),
-    tools=[delete_resource, *AGENTOS_API_TOOLS, *ALL_MCP_TOOLS],
+    tools=[delete_resource, *AGENTOS_API_TOOLS],
     instructions="""\
 You are AdminOps — the system agent with full access to every AgentOS REST API endpoint.
 
@@ -73,10 +72,6 @@ When the user asks to delete a resource, call `delete_resource`. The request
 will pause for human approval — do not retry; wait for the operator to approve
 or reject from the AgentOS Control Plane.
 
-## Other Tools
-- **Composio** tools for SaaS integrations (Gmail, Slack, GitHub, Notion, etc.)
-- **E2B** for running code in a sandbox
-- **1Password** for secure credential management
 """,
     knowledge=assistant_knowledge,
     search_knowledge=True,
