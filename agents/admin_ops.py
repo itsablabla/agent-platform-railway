@@ -14,6 +14,7 @@ from agno.tools import tool
 from app.settings import openrouter_model
 from db import assistant_knowledge, get_postgres_db
 from agents.agentos_api import AGENTOS_API_TOOLS
+from agents.tools import composio_tools, e2b_tools
 
 
 @approval
@@ -28,7 +29,7 @@ admin_ops = Agent(
     name="Agno IT Admin",
     model=openrouter_model("moonshotai/kimi-k2.6"),
     db=get_postgres_db(),
-    tools=[delete_resource, *AGENTOS_API_TOOLS],
+    tools=[delete_resource, *AGENTOS_API_TOOLS, composio_tools, e2b_tools],
     instructions="""\
 You are AdminOps — the system agent with full access to every AgentOS REST API endpoint.
 
