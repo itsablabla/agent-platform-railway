@@ -62,7 +62,6 @@ if getenv("TELEGRAM_BOT_TOKEN") or getenv("TELEGRAM_TOKEN"):
 if getenv("DISCORD_PUBLIC_KEY") and getenv("DISCORD_BOT_TOKEN"):
     interfaces.append(Discord(agent=jada))
 
-
 # ---------------------------------------------------------------------------
 # Lifespan — extension hook for app-level startup / teardown.
 #
@@ -113,7 +112,6 @@ async def lifespan(app):  # type: ignore[no-untyped-def]
     finally:
         log_info("AgentOS lifespan: shutdown")
 
-
 # ---------------------------------------------------------------------------
 # Create AgentOS
 # ---------------------------------------------------------------------------
@@ -157,10 +155,6 @@ agent_os = AgentOS(
 )
 app = agent_os.get_app()
 
-# Mount custom interfaces that AgentOS doesn't manage natively
-for _iface in interfaces:
-    if hasattr(_iface, "get_router") and _iface.type in ("telegram", "discord"):
-        app.include_router(_iface.get_router())
 
 
 if __name__ == "__main__":
