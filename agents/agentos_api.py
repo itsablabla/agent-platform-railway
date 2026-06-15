@@ -1404,3 +1404,120 @@ AGENTOS_API_TOOLS = [
     # AG-UI
     api_agui_status,
 ]
+
+# ---------------------------------------------------------------------------
+# Curated tool groups — import these in specialist agents rather than
+# pulling the full AGENTOS_API_TOOLS list.
+# ---------------------------------------------------------------------------
+
+A2A_TOOLS = [
+    api_get_agent_card,
+    api_get_team_card,
+    api_get_workflow_card,
+    api_a2a_send_agent_message,
+    api_a2a_get_agent_task,
+    api_a2a_cancel_agent_task,
+    api_a2a_send_team_message,
+    api_a2a_get_team_task,
+    api_a2a_cancel_team_task,
+    api_a2a_send_workflow_message,
+]
+
+AGENT_RUN_TOOLS = [
+    api_list_agents,
+    api_get_agent,
+    api_create_agent_run,
+    api_list_agent_runs,
+    api_get_agent_run,
+    api_continue_agent_run,
+    api_cancel_agent_run,
+    api_list_teams,
+    api_get_team,
+    api_create_team_run,
+    api_list_team_runs,
+    api_get_team_run,
+    api_cancel_team_run,
+    api_list_workflows,
+    api_get_workflow,
+    api_execute_workflow,
+    api_get_workflow_run,
+    api_cancel_workflow_run,
+]
+
+SESSION_TOOLS = [
+    api_list_sessions,
+    api_create_session,
+    api_get_session,
+    api_update_session,
+    api_rename_session,
+    api_delete_session,
+    api_delete_multiple_sessions,
+    api_get_session_runs,
+    api_get_run_by_id,
+]
+
+TRACE_TOOLS = [
+    api_list_traces,
+    api_get_trace,
+    api_get_trace_statistics,
+    api_search_traces,
+    api_get_trace_filter_schema,
+]
+
+METRIC_TOOLS = [
+    api_health_check,
+    api_info,
+    api_get_available_models,
+    api_get_os_configuration,
+    api_get_metrics,
+    api_refresh_metrics,
+]
+
+APPROVAL_TOOLS = [
+    api_list_approvals,
+    api_get_approval,
+    api_get_approval_count,
+    api_get_approval_status,
+    api_resolve_approval,
+    api_delete_approval,
+]
+
+SCHEDULE_TOOLS = [
+    api_list_schedules,
+    api_get_schedule,
+    api_create_schedule,
+    api_update_schedule,
+    api_delete_schedule,
+    api_enable_schedule,
+    api_disable_schedule,
+    api_trigger_schedule,
+    api_list_schedule_runs,
+    api_get_schedule_run,
+]
+
+KNOWLEDGE_TOOLS = [
+    api_list_knowledge_content,
+    api_get_knowledge_content,
+    api_upload_knowledge_content,
+    api_upload_remote_knowledge_content,
+    api_update_knowledge_content,
+    api_delete_knowledge_content,
+    api_delete_all_knowledge_content,
+    api_list_knowledge_sources,
+    api_list_files_in_knowledge_source,
+    api_get_knowledge_content_status,
+    api_get_knowledge_config,
+    api_search_knowledge,
+]
+
+MEMORY_TOOLS = [
+    api_list_memories,
+    api_get_memory,
+    api_create_memory,
+    api_update_memory,
+    api_delete_memory,
+    api_delete_multiple_memories,
+    api_get_memory_topics,
+    api_get_user_memory_statistics,
+    api_optimize_user_memories,
+]

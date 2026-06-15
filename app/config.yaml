@@ -1,5 +1,27 @@
 chat:
   quick_prompts:
+    # Operator hierarchy
+    system-operator:
+      - "What is the overall health of this deployment?"
+      - "Show me any pending approvals and resolve them"
+      - "Coordinate a full system status report across all agents"
+    railway-agent:
+      - "Show me the last 100 lines of Railway logs"
+      - "What is the current deployment status?"
+      - "List all environment variables set on this service"
+    security-agent:
+      - "List all items in the Main 1Password vault"
+      - "Generate a new 32-character API key and store it in 1Password"
+      - "Audit which secrets are in Railway env but not in 1Password"
+    session-analyst:
+      - "List the 10 most recent sessions and summarise their health"
+      - "Find any sessions with failed tool calls in the last 24 hours"
+      - "Show me the full trace for the most recent agent run"
+    log-analyst:
+      - "Pull the last 200 lines of Railway logs and identify any errors"
+      - "Search traces for any runs that errored in the last hour"
+      - "Run a root-cause analysis on the most recent deployment failure"
+    # General-purpose agents
     web-search:
       - "Tell me about Agno's AgentOS"
       - "What's the latest research from Anthropic?"
@@ -8,3 +30,10 @@ chat:
       - "What agents are available in this project?"
       - "How does the database connection work?"
       - "Walk me through the main entry point"
+    agno-it-admin:
+      - "List all registered agents and their IDs"
+      - "Show me the current schedule list"
+      - "What are the system metrics right now?"
+    e2b-coder:
+      - "Run a Python script to test the E2B sandbox"
+      - "Install a package and execute code in a sandbox"

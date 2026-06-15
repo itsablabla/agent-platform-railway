@@ -12,6 +12,11 @@ from agno.utils.log import log_info
 
 from agents.admin_ops import admin_ops
 from agents.e2b_coder import e2b_coder
+from agents.log_analyst import log_analyst
+from agents.railway_agent import railway_agent
+from agents.security_agent import security_agent
+from agents.session_analyst import session_analyst
+from agents.system_operator import system_operator
 from app.interfaces import Discord, Telegram
 from agents.claude_opus import claude_opus_agent
 from agents.code_search import code_search
@@ -74,8 +79,11 @@ async def lifespan(app):  # type: ignore[no-untyped-def]
     # or corrupting HTTP connection state — either of which causes
     # "Failed to initialize MCP toolkit" on every subsequent run.
     _connected: set[int] = set()
-    all_agents = [web_search, code_search, admin_ops, composio_agent, jada,
-                  claude_opus_agent, gpt55_agent, kimi_agent, openrouter_agent, e2b_coder]
+    all_agents = [
+        web_search, code_search, admin_ops, composio_agent, jada,
+        claude_opus_agent, gpt55_agent, kimi_agent, openrouter_agent, e2b_coder,
+        system_operator, railway_agent, security_agent, session_analyst, log_analyst,
+    ]
     for agent in all_agents:
         for toolkit in getattr(agent, "tools", []):
             if toolkit is None or id(toolkit) in _connected:
@@ -109,10 +117,18 @@ agent_os = AgentOS(
     scheduler_poll_interval=15,
     scheduler_base_url=scheduler_base_url,
     authorization=False,
+    a2a_interface=True,
     lifespan=lifespan,
     db=get_postgres_db(),
     registry=_registry,
     agents=[
+        # Operator hierarchy (top to bottom)
+        system_operator,
+        railway_agent,
+        security_agent,
+        session_analyst,
+        log_analyst,
+        # General-purpose agents
         web_search,
         code_search,
         admin_ops,
