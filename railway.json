@@ -6,8 +6,8 @@
   },
   "deploy": {
     "runtime": "V2",
-    "numReplicas": 2,
-    "startCommand": "uvicorn app.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 0 --timeout-graceful-shutdown 0",
+    "numReplicas": 1,
+    "startCommand": "uvicorn app.main:app --host 0.0.0.0 --port 8000 --timeout-keep-alive 30 --timeout-graceful-shutdown 10",
     "sleepApplication": false,
     "useLegacyStacker": false,
     "limits": {

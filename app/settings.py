@@ -63,6 +63,7 @@ def default_model(model_id: str | None = None) -> OpenAIChat:
         id=chosen,
         api_key=getenv("OPENAI_API_KEY"),
         base_url=getenv("OPENAI_BASE_URL"),
+        timeout=300,
     )
 
 
@@ -76,6 +77,7 @@ def openrouter_model(model_id: str | None = None) -> OpenAILike:
         id=chosen,
         api_key=getenv("OPENROUTER_API_KEY"),
         base_url=OPENROUTER_BASE_URL,
+        timeout=300,
     )
 
 
