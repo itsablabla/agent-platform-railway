@@ -28,6 +28,7 @@ from agents.openrouter import openrouter_agent
 from agents.web_search import web_search
 from app.settings import build_openrouter_registry
 from db import get_postgres_db
+from teams.bug_testing import bug_testing_team
 
 # ---------------------------------------------------------------------------
 # Environment
@@ -149,6 +150,9 @@ agent_os = AgentOS(
         kimi_agent,
         openrouter_agent,
         e2b_coder,
+    ],
+    teams=[
+        bug_testing_team,
     ],
     interfaces=interfaces,
     config=str(Path(__file__).parent / "config.yaml"),
