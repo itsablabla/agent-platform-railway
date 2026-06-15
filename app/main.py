@@ -9,6 +9,7 @@ from pathlib import Path
 
 from agno.os import AgentOS
 from agno.utils.log import log_info
+from sqlalchemy import text
 
 from agents.admin_ops import admin_ops
 from agents.e2b_coder import e2b_coder
@@ -72,6 +73,35 @@ if getenv("DISCORD_PUBLIC_KEY") and getenv("DISCORD_BOT_TOKEN"):
 @asynccontextmanager
 async def lifespan(app):  # type: ignore[no-untyped-def]
     log_info("AgentOS lifespan: startup")
+
+    # ── One-shot migration: fix debug team model ──────────────────────────
+    # The debug team was created in Agno Studio with amazon/nova-pro-v1.
+    # Switch it to moonshotai/kimi-k2.6 so the user’s runs actually work.
+    try:
+        import json
+        db = get_postgres_db()
+        engine = db.engine
+        with engine.connect() as conn:
+            row = conn.execute(
+                text("SELECT id, model_data FROM agno_teams WHERE id = 'debug'")
+            ).fetchone()
+            if row:
+                team_id, model_data = row
+                md = json.loads(model_data) if isinstance(model_data, str) else (dict(model_data) if model_data else {})
+                if md.get("id") != "moonshotai/kimi-k2.6":
+                    md["id"] = "moonshotai/kimi-k2.6"
+                    md["name"] = "OpenAILike"
+                    md["provider"] = "OpenAI"
+                    conn.execute(
+                        text("UPDATE agno_teams SET model_data = :md WHERE id = :tid"),
+                        {"md": json.dumps(md), "tid": team_id},
+                    )
+                    conn.commit()
+                    log_info(f"[migration] debug team model switched to moonshotai/kimi-k2.6")
+                else:
+                    log_info("[migration] debug team already on kimi-k2.6, skipping")
+    except Exception as exc:
+        log_info(f"[migration] debug team model migration skipped: {exc}")
 
     # Eagerly connect each MCP toolkit exactly once.
     # All agents share the same MCPTools object instances (defined in tools.py),
