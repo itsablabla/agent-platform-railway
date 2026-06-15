@@ -29,6 +29,7 @@ from agents.openrouter import openrouter_agent
 from agents.web_search import web_search
 from app.settings import build_openrouter_registry
 from db import get_postgres_db
+from db.url import db_url
 from teams.bug_testing import bug_testing_team
 
 # ---------------------------------------------------------------------------
@@ -79,8 +80,8 @@ async def lifespan(app):  # type: ignore[no-untyped-def]
     # Switch it to moonshotai/kimi-k2.6 so the user’s runs actually work.
     try:
         import json
-        db = get_postgres_db()
-        engine = db.engine
+        from sqlalchemy import create_engine
+        engine = create_engine(db_url)
         with engine.connect() as conn:
             row = conn.execute(
                 text("SELECT id, model_data FROM agno_teams WHERE id = 'debug'")
@@ -97,7 +98,7 @@ async def lifespan(app):  # type: ignore[no-untyped-def]
                         {"md": json.dumps(md), "tid": team_id},
                     )
                     conn.commit()
-                    log_info(f"[migration] debug team model switched to moonshotai/kimi-k2.6")
+                    log_info("[migration] debug team model switched to moonshotai/kimi-k2.6")
                 else:
                     log_info("[migration] debug team already on kimi-k2.6, skipping")
     except Exception as exc:
