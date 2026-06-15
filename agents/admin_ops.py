@@ -11,7 +11,7 @@ from agno.agent import Agent
 from agno.approval import approval
 from agno.tools import tool
 
-from app.settings import openrouter_model
+from app.settings import default_model
 from db import assistant_knowledge, get_postgres_db
 from agents.agentos_api import AGENTOS_API_TOOLS
 from agents.tools import composio_tools, e2b_tools, op_tools, sequential_thinking_tools, shell_execute, web_tools
@@ -27,7 +27,7 @@ def delete_resource(resource_id: str) -> str:
 admin_ops = Agent(
     id="agno-it-admin",
     name="Agno IT Admin",
-    model=openrouter_model("moonshotai/kimi-k2.6"),
+    model=default_model(),
     db=get_postgres_db(),
     tools=[delete_resource, web_tools, shell_execute, sequential_thinking_tools, *op_tools, *AGENTOS_API_TOOLS, composio_tools, e2b_tools],
     instructions="""\
