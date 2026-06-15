@@ -22,7 +22,6 @@ codebase_context = WorkspaceContextProvider(
     name="My Codebase",
     root=REPO_ROOT,
     model=default_model(),
-        compress_tool_results=True,
 )
 
 
