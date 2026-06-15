@@ -90,7 +90,45 @@ def op_password_read(secret_reference: str) -> str:
 
 op_tools = [op_generate_password, op_vault_list, op_password_read]
 
+
+# ---------------------------------------------------------------------------
+# Shell execution (runs commands on the server process)
+# ---------------------------------------------------------------------------
+@tool
+def shell_execute(command: str, timeout: int = 60) -> str:
+    """Run a shell command on the server and return stdout + stderr.
+
+    Args:
+        command: Shell command to execute (runs via /bin/sh -c).
+        timeout: Maximum seconds to wait (default 60).
+    """
+    import subprocess
+
+    try:
+        result = subprocess.run(
+            command,
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+        out = result.stdout.strip()
+        err = result.stderr.strip()
+        parts = []
+        if out:
+            parts.append(out)
+        if err:
+            parts.append(f"[stderr]\n{err}")
+        if result.returncode != 0:
+            parts.append(f"[exit code {result.returncode}]")
+        return "\n".join(parts) if parts else "(no output)"
+    except subprocess.TimeoutExpired:
+        return f"[timed out after {timeout}s]"
+    except Exception as exc:
+        return f"[error] {exc}"
+
+
 # ---------------------------------------------------------------------------
 # Collection of all available toolkits
 # ---------------------------------------------------------------------------
-ALL_MCP_TOOLS = [web_tools, composio_tools, e2b_tools, *op_tools]
+ALL_MCP_TOOLS = [web_tools, composio_tools, e2b_tools, *op_tools, shell_execute]
