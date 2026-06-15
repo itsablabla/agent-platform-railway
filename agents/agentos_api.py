@@ -978,6 +978,53 @@ def api_whatsapp_post_webhook(payload: str) -> str:
 
 
 # ===========================================================================
+# TELEGRAM INTERFACE  (/telegram prefix — active only when TELEGRAM_BOT_TOKEN set)
+# ===========================================================================
+
+@tool
+def api_telegram_status() -> str:
+    """Check whether the Telegram bot interface is active and the token is configured."""
+    return _get("/telegram/status")
+
+
+@tool
+def api_telegram_post_update(payload: str) -> str:
+    """Post a Telegram update to the AgentOS Telegram interface webhook endpoint.
+    payload must be a JSON string in the Telegram Bot API update format, e.g.:
+    {"update_id": 1, "message": {"chat": {"id": 123}, "from": {"id": 456}, "text": "Hello"}}
+    Use for testing the integration or replaying updates."""
+    try:
+        body = json.loads(payload)
+    except Exception:
+        return f"Error: payload must be valid JSON, got: {payload}"
+    return _post("/telegram/webhook", body)
+
+
+# ===========================================================================
+# DISCORD INTERFACE  (/discord prefix — active only when DISCORD keys are set)
+# ===========================================================================
+
+@tool
+def api_discord_status() -> str:
+    """Check whether the Discord bot interface is active and all keys are configured."""
+    return _get("/discord/status")
+
+
+@tool
+def api_discord_post_interaction(payload: str) -> str:
+    """Post a Discord interaction to the AgentOS Discord interface endpoint.
+    payload must be a JSON string in the Discord Interactions API format, e.g.:
+    {"type": 1} for a ping, or {"type": 2, "data": {"name": "ask"}, "token": "...", ...}
+    for a slash command. Note: signature verification is skipped when DISCORD_PUBLIC_KEY
+    is not set (dev mode only)."""
+    try:
+        body = json.loads(payload)
+    except Exception:
+        return f"Error: payload must be valid JSON, got: {payload}"
+    return _post("/discord/interactions", body)
+
+
+# ===========================================================================
 # COMPONENTS / REGISTRY
 # ===========================================================================
 
@@ -1321,6 +1368,12 @@ AGENTOS_API_TOOLS = [
     api_whatsapp_status,
     api_whatsapp_verify_webhook,
     api_whatsapp_post_webhook,
+    # Telegram Interface
+    api_telegram_status,
+    api_telegram_post_update,
+    # Discord Interface
+    api_discord_status,
+    api_discord_post_interaction,
     # Components
     api_list_components,
     api_get_component,

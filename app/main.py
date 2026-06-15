@@ -11,6 +11,7 @@ from agno.os import AgentOS
 from agno.utils.log import log_info
 
 from agents.admin_ops import admin_ops
+from app.interfaces import Discord, Telegram
 from agents.claude_opus import claude_opus_agent
 from agents.code_search import code_search
 from agents.composio import composio_agent
@@ -48,6 +49,12 @@ if SLACK_BOT_TOKEN and SLACK_SIGNING_SECRET:
             resolve_user_identity=True,
         )
     )
+
+if getenv("TELEGRAM_BOT_TOKEN"):
+    interfaces.append(Telegram(agent=jada))
+
+if getenv("DISCORD_PUBLIC_KEY") and getenv("DISCORD_BOT_TOKEN"):
+    interfaces.append(Discord(agent=jada))
 
 
 # ---------------------------------------------------------------------------
@@ -109,6 +116,11 @@ agent_os = AgentOS(
     config=str(Path(__file__).parent / "config.yaml"),
 )
 app = agent_os.get_app()
+
+# Mount custom interfaces that AgentOS doesn't manage natively
+for _iface in interfaces:
+    if hasattr(_iface, "get_router") and _iface.type in ("telegram", "discord"):
+        app.include_router(_iface.get_router())
 
 
 if __name__ == "__main__":

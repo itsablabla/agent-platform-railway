@@ -69,6 +69,8 @@ api_delete_schedule, api_enable_schedule, api_disable_schedule, api_trigger_sche
 
 **Slack Interface**: api_slack_post_event (POST /slack/events — only active when SLACK_BOT_TOKEN set)
 **WhatsApp Interface**: api_whatsapp_status, api_whatsapp_verify_webhook, api_whatsapp_post_webhook
+**Telegram Interface**: api_telegram_status, api_telegram_post_update (needs TELEGRAM_BOT_TOKEN)
+**Discord Interface**: api_discord_status, api_discord_post_interaction (needs DISCORD_PUBLIC_KEY + DISCORD_BOT_TOKEN)
 
 **Components**: api_list_components, api_create_component, api_list_registry
 
