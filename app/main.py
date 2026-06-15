@@ -17,7 +17,9 @@ from agents.composio import composio_agent
 from agents.gpt_55 import gpt55_agent
 from agents.jada import jada
 from agents.kimi import kimi_agent
+from agents.openrouter import openrouter_agent
 from agents.web_search import web_search
+from app.settings import build_openrouter_registry
 from db import get_postgres_db
 
 # ---------------------------------------------------------------------------
@@ -59,7 +61,7 @@ async def lifespan(app):  # type: ignore[no-untyped-def]
     log_info("AgentOS lifespan: startup")
     
     # Eagerly connect MCP toolkits so tools are ready immediately
-    for agent in [web_search, code_search, admin_ops, composio_agent, jada, claude_opus_agent, gpt55_agent, kimi_agent]:
+    for agent in [web_search, code_search, admin_ops, composio_agent, jada, claude_opus_agent, gpt55_agent, kimi_agent, openrouter_agent]:
         for tool in getattr(agent, "tools", []):
             if tool and hasattr(tool, "connect") and callable(getattr(tool, "connect")):
                 try:
@@ -77,6 +79,11 @@ async def lifespan(app):  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 # Create AgentOS
 # ---------------------------------------------------------------------------
+
+# Pre-populate registry with all OpenRouter models so they appear in
+# GET /registry?resource_type=model without needing one agent per model.
+_registry = build_openrouter_registry()
+
 agent_os = AgentOS(
     name="AgentOS",
     tracing=True,
@@ -86,6 +93,7 @@ agent_os = AgentOS(
     authorization=runtime_env == "prd",
     lifespan=lifespan,
     db=get_postgres_db(),
+    registry=_registry,
     agents=[
         web_search,
         code_search,
@@ -95,6 +103,7 @@ agent_os = AgentOS(
         claude_opus_agent,
         gpt55_agent,
         kimi_agent,
+        openrouter_agent,
     ],
     interfaces=interfaces,
     config=str(Path(__file__).parent / "config.yaml"),

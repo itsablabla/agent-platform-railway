@@ -7,11 +7,15 @@ Shared runtime objects for the platform.
 All models route through the Garza LLM Gateway (OpenAI-compatible).
 The gateway exposes a curated set of Claude, GPT, and Kimi models behind
 one API at OPENAI_BASE_URL.
+
+OpenRouter is also supported as a direct provider with access to all
+public models via OPENROUTER_API_KEY.
 """
 
 from os import getenv
 
 from agno.models.openai import OpenAIChat
+from agno.models.openai.like import OpenAILike
 
 # All 22 models available on the Garza LLM Gateway.
 GARZA_MODELS: list[str] = [
@@ -41,6 +45,9 @@ GARZA_MODELS: list[str] = [
 
 DEFAULT_GARZA_MODEL = "claude-sonnet-4-5-20250929"
 
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+DEFAULT_OPENROUTER_MODEL = "anthropic/claude-sonnet-4-5"
+
 
 def default_model(model_id: str | None = None) -> OpenAIChat:
     """Return a fresh model instance per agent — avoids shared-state footguns.
@@ -56,3 +63,52 @@ def default_model(model_id: str | None = None) -> OpenAIChat:
         api_key=getenv("OPENAI_API_KEY"),
         base_url=getenv("OPENAI_BASE_URL"),
     )
+
+
+def openrouter_model(model_id: str | None = None) -> OpenAILike:
+    """Return an OpenRouter model instance.
+
+    Defaults to DEFAULT_OPENROUTER_MODEL when no id is given.
+    """
+    chosen = model_id or getenv("OPENROUTER_MODEL") or DEFAULT_OPENROUTER_MODEL
+    return OpenAILike(
+        id=chosen,
+        api_key=getenv("OPENROUTER_API_KEY"),
+        base_url=OPENROUTER_BASE_URL,
+    )
+
+
+def build_openrouter_registry():
+    """Fetch all public OpenRouter models and return a pre-populated Registry.
+
+    The Registry is passed to AgentOS so every model appears in
+    GET /registry?resource_type=model without needing one agent per model.
+    Falls back to an empty Registry when the API is unreachable.
+    """
+    import json
+    import urllib.request
+
+    from agno.registry import Registry
+    from agno.utils.log import log_info, log_warning
+
+    registry = Registry()
+    api_key = getenv("OPENROUTER_API_KEY", "")
+    if not api_key:
+        log_warning("OPENROUTER_API_KEY not set — skipping OpenRouter model discovery")
+        return registry
+
+    try:
+        req = urllib.request.Request(
+            f"{OPENROUTER_BASE_URL}/models",
+            headers={"Authorization": f"Bearer {api_key}"},
+        )
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = json.loads(resp.read())
+        models = data.get("data", [])
+        for m in models:
+            registry.add_model(openrouter_model(m["id"]))
+        log_info(f"OpenRouter: registered {len(models)} models in registry")
+    except Exception as exc:
+        log_warning(f"OpenRouter model discovery failed: {exc}")
+
+    return registry
