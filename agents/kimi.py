@@ -16,6 +16,7 @@ kimi_agent = Agent(
     id="kimi",
     name="Kimi K2.5",
     model=default_model(),
+        compress_tool_results=True,
     db=get_postgres_db(),
     instructions="""\
 You are a helpful assistant powered by Kimi K2.5. Be clear and concise.

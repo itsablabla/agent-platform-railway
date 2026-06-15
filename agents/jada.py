@@ -33,6 +33,7 @@ jada = Agent(
     id="jada",
     name="Jada",
     model=default_model(),
+        compress_tool_results=True,
     db=get_postgres_db(),
     tools=[
         *codebase_context.get_tools(),

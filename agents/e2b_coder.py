@@ -43,6 +43,7 @@ e2b_coder = Agent(
     id="e2b-coder",
     name="E2B Coder",
     model=default_model(),
+        compress_tool_results=True,
     db=get_postgres_db(),
     tools=[e2b_tools, composio_tools, sequential_thinking_tools, *op_tools],
     instructions=E2B_INSTRUCTIONS,

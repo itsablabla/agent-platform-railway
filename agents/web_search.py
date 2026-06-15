@@ -37,6 +37,7 @@ web_search = Agent(
     id="web-search",
     name="WebSearch",
     model=default_model(),
+        compress_tool_results=True,
     db=get_postgres_db(),
     tools=ALL_MCP_TOOLS,
     instructions=WEB_SEARCH_INSTRUCTIONS,

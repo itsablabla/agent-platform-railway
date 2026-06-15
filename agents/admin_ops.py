@@ -28,6 +28,7 @@ admin_ops = Agent(
     id="agno-it-admin",
     name="Agno IT Admin",
     model=default_model(),
+        compress_tool_results=True,
     db=get_postgres_db(),
     tools=[delete_resource, web_tools, shell_execute, sequential_thinking_tools, *op_tools, *AGENTOS_API_TOOLS, composio_tools, e2b_tools],
     instructions="""\

@@ -90,6 +90,7 @@ log_analyst = Agent(
     id="log-analyst",
     name="Log Analyst",
     model=default_model(),
+        compress_tool_results=True,
     db=get_postgres_db(),
     tools=[
         sequential_thinking_tools,

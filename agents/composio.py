@@ -32,6 +32,7 @@ composio_agent = Agent(
     id="composio",
     name="Composio",
     model=default_model(),
+        compress_tool_results=True,
     db=get_postgres_db(),
     tools=ALL_MCP_TOOLS,
     instructions=COMPOSIO_INSTRUCTIONS,

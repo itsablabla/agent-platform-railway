@@ -16,6 +16,7 @@ gpt55_agent = Agent(
     id="gpt-55",
     name="GPT 5.5",
     model=default_model(),
+        compress_tool_results=True,
     db=get_postgres_db(),
     instructions="""\
 You are a helpful assistant powered by GPT-5.5. Be clear and concise.

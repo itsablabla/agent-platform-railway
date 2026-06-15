@@ -76,6 +76,7 @@ system_operator = Agent(
     id="system-operator",
     name="System Operator",
     model=default_model(),
+        compress_tool_results=True,
     db=get_postgres_db(),
     tools=[
         sequential_thinking_tools,

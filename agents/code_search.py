@@ -22,6 +22,7 @@ codebase_context = WorkspaceContextProvider(
     name="My Codebase",
     root=REPO_ROOT,
     model=default_model(),
+        compress_tool_results=True,
 )
 
 
@@ -41,6 +42,7 @@ code_search = Agent(
     id="code-search",
     name="CodeSearch",
     model=default_model(),
+        compress_tool_results=True,
     db=get_postgres_db(),
     tools=[*codebase_context.get_tools(), *ALL_MCP_TOOLS],
     instructions=CODE_SEARCH_INSTRUCTIONS + "\n\n" + codebase_context.instructions(),

@@ -74,6 +74,7 @@ security_agent = Agent(
     id="security-agent",
     name="Security Agent",
     model=default_model(),
+        compress_tool_results=True,
     db=get_postgres_db(),
     tools=[
         sequential_thinking_tools,

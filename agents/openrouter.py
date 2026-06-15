@@ -22,6 +22,7 @@ openrouter_agent = Agent(
     id="openrouter",
     name="OpenRouter",
     model=default_model(),
+        compress_tool_results=True,
     db=get_postgres_db(),
     instructions="""\
 You are a helpful assistant powered by OpenRouter, which gives you access

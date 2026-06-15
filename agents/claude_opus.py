@@ -16,6 +16,7 @@ claude_opus_agent = Agent(
     id="claude-opus",
     name="Claude Opus",
     model=default_model(),
+        compress_tool_results=True,
     db=get_postgres_db(),
     instructions="""\
 You are a helpful assistant powered by Claude Opus 4.8. Be clear and concise.

@@ -72,6 +72,7 @@ session_analyst = Agent(
     id="session-analyst",
     name="Session Analyst",
     model=default_model(),
+        compress_tool_results=True,
     db=get_postgres_db(),
     tools=[
         sequential_thinking_tools,
