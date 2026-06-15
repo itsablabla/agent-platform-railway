@@ -15,7 +15,7 @@ from agents.tools import ALL_MCP_TOOLS
 gpt55_agent = Agent(
     id="gpt-55",
     name="GPT 5.5",
-    model=default_model(model_id="gpt-5.5"),
+    model=default_model(),
     db=get_postgres_db(),
     instructions="""\
 You are a helpful assistant powered by GPT-5.5. Be clear and concise.

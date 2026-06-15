@@ -32,7 +32,7 @@ destructive actions (send, delete, modify), ask the user to confirm first.
 jada = Agent(
     id="jada",
     name="Jada",
-    model=default_model(model_id="claude-sonnet-4-5-20250929"),
+    model=default_model(),
     db=get_postgres_db(),
     tools=[
         *codebase_context.get_tools(),

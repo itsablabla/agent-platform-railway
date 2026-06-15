@@ -21,7 +21,7 @@ from agents.tools import ALL_MCP_TOOLS
 openrouter_agent = Agent(
     id="openrouter",
     name="OpenRouter",
-    model=openrouter_model(),
+    model=openrouter_model("moonshotai/kimi-k2.6"),
     db=get_postgres_db(),
     instructions="""\
 You are a helpful assistant powered by OpenRouter, which gives you access

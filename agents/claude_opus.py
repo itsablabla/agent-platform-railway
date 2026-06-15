@@ -15,7 +15,7 @@ from agents.tools import ALL_MCP_TOOLS
 claude_opus_agent = Agent(
     id="claude-opus",
     name="Claude Opus",
-    model=default_model(model_id="claude-opus-4-8"),
+    model=default_model(),
     db=get_postgres_db(),
     instructions="""\
 You are a helpful assistant powered by Claude Opus 4.8. Be clear and concise.
