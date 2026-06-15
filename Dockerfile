@@ -36,6 +36,9 @@ COPY requirements.txt ./
 RUN uv pip sync requirements.txt --system
 COPY . .
 
+# Patch agno 2.6.14 bug: _resume_stream_generator calls .value on string status
+RUN python3 scripts/patch_agno.py
+
 # ---------------------------------------------------------------------------
 # Entrypoint
 # ---------------------------------------------------------------------------
