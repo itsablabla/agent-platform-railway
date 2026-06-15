@@ -773,85 +773,208 @@ def api_get_trace_filter_schema() -> str:
 
 @tool
 def api_get_agent_card(agent_id: str) -> str:
-    """Get the A2A agent card for an agent (capability/skill manifest)."""
-    return _get(f"/a2a/agents/{agent_id}")
+    """Get the A2A agent card (capability/skill manifest) for an agent."""
+    return _get(f"/a2a/agents/{agent_id}/.well-known/agent-card.json")
 
 
 @tool
 def api_get_team_card(team_id: str) -> str:
-    """Get the A2A team card for a team."""
-    return _get(f"/a2a/teams/{team_id}")
+    """Get the A2A agent card (capability manifest) for a team."""
+    return _get(f"/a2a/teams/{team_id}/.well-known/agent-card.json")
 
 
 @tool
 def api_get_workflow_card(workflow_id: str) -> str:
-    """Get the A2A workflow card for a workflow."""
-    return _get(f"/a2a/workflows/{workflow_id}")
+    """Get the A2A agent card (capability manifest) for a workflow."""
+    return _get(f"/a2a/workflows/{workflow_id}/.well-known/agent-card.json")
+
+
+def _a2a_body(method: str, message: str, context_id: Optional[str], request_id: str = "1") -> dict:
+    return {
+        "jsonrpc": "2.0",
+        "id": request_id,
+        "method": method,
+        "params": {
+            "message": {
+                "role": "user",
+                "parts": [{"kind": "text", "text": message}],
+                **({"contextId": context_id} if context_id else {}),
+            }
+        },
+    }
 
 
 @tool
-def api_a2a_run_agent(
+def api_a2a_send_agent_message(
     agent_id: str,
     message: str,
-    session_id: Optional[str] = None,
-    user_id: Optional[str] = None,
+    context_id: Optional[str] = None,
+    blocking: bool = True,
 ) -> str:
-    """Send a message to an agent via the A2A protocol."""
-    return _post(f"/a2a/agents/{agent_id}/tasks", {
-        "message": {"role": "user", "content": message},
-        "session_id": session_id,
-        "user_id": user_id,
-    })
+    """Send a message to an agent via the A2A v1 JSON-RPC protocol (non-streaming).
+    Returns a task object with id, status, and history. blocking=False runs in background."""
+    body = _a2a_body("message/send", message, context_id)
+    if not blocking:
+        body["params"]["configuration"] = {"blocking": False}
+    return _post(f"/a2a/agents/{agent_id}/v1/message:send", body)
 
 
 @tool
-def api_a2a_run_team(
+def api_a2a_get_agent_task(
+    agent_id: str,
+    task_id: str,
+    context_id: Optional[str] = None,
+) -> str:
+    """Get the status and result of an A2A agent task by task_id."""
+    body = {
+        "jsonrpc": "2.0",
+        "id": "1",
+        "method": "tasks/get",
+        "params": {"id": task_id, **({"contextId": context_id} if context_id else {})},
+    }
+    return _post(f"/a2a/agents/{agent_id}/v1/tasks:get", body)
+
+
+@tool
+def api_a2a_cancel_agent_task(
+    agent_id: str,
+    task_id: str,
+    context_id: Optional[str] = None,
+) -> str:
+    """Cancel an in-progress A2A agent task."""
+    body = {
+        "jsonrpc": "2.0",
+        "id": "1",
+        "method": "tasks/cancel",
+        "params": {"id": task_id, **({"contextId": context_id} if context_id else {})},
+    }
+    return _post(f"/a2a/agents/{agent_id}/v1/tasks:cancel", body)
+
+
+@tool
+def api_a2a_send_team_message(
     team_id: str,
     message: str,
-    session_id: Optional[str] = None,
+    context_id: Optional[str] = None,
+    blocking: bool = True,
 ) -> str:
-    """Send a message to a team via the A2A protocol."""
-    return _post(f"/a2a/teams/{team_id}/tasks", {
-        "message": {"role": "user", "content": message},
-        "session_id": session_id,
-    })
+    """Send a message to a team via the A2A v1 JSON-RPC protocol (non-streaming)."""
+    body = _a2a_body("message/send", message, context_id)
+    if not blocking:
+        body["params"]["configuration"] = {"blocking": False}
+    return _post(f"/a2a/teams/{team_id}/v1/message:send", body)
 
 
 @tool
-def api_a2a_run_workflow(
+def api_a2a_get_team_task(
+    team_id: str,
+    task_id: str,
+    context_id: Optional[str] = None,
+) -> str:
+    """Get the status and result of an A2A team task by task_id."""
+    body = {
+        "jsonrpc": "2.0",
+        "id": "1",
+        "method": "tasks/get",
+        "params": {"id": task_id, **({"contextId": context_id} if context_id else {})},
+    }
+    return _post(f"/a2a/teams/{team_id}/v1/tasks:get", body)
+
+
+@tool
+def api_a2a_cancel_team_task(
+    team_id: str,
+    task_id: str,
+    context_id: Optional[str] = None,
+) -> str:
+    """Cancel an in-progress A2A team task."""
+    body = {
+        "jsonrpc": "2.0",
+        "id": "1",
+        "method": "tasks/cancel",
+        "params": {"id": task_id, **({"contextId": context_id} if context_id else {})},
+    }
+    return _post(f"/a2a/teams/{team_id}/v1/tasks:cancel", body)
+
+
+@tool
+def api_a2a_send_workflow_message(
     workflow_id: str,
     message: str,
+    context_id: Optional[str] = None,
+    blocking: bool = True,
+) -> str:
+    """Send a message to a workflow via the A2A v1 JSON-RPC protocol (non-streaming)."""
+    body = _a2a_body("message/send", message, context_id)
+    if not blocking:
+        body["params"]["configuration"] = {"blocking": False}
+    return _post(f"/a2a/workflows/{workflow_id}/v1/message:send", body)
+
+
+@tool
+def api_a2a_legacy_send(
+    message: str,
+    agent_id: Optional[str] = None,
     session_id: Optional[str] = None,
 ) -> str:
-    """Execute a workflow via the A2A protocol."""
-    return _post(f"/a2a/workflows/{workflow_id}/tasks", {
+    """Legacy A2A send endpoint — routes to any agent. Prefer api_a2a_send_agent_message for new code."""
+    return _post("/a2a/message/send", {
         "message": {"role": "user", "content": message},
+        "agent_id": agent_id,
         "session_id": session_id,
     })
 
 
-@tool
-def api_get_agent_task(agent_id: str, task_id: str) -> str:
-    """Get the status/result of an A2A agent task."""
-    return _get(f"/a2a/agents/{agent_id}/tasks/{task_id}")
-
+# ===========================================================================
+# SLACK INTERFACE  (/slack prefix — active only when SLACK_BOT_TOKEN is set)
+# ===========================================================================
 
 @tool
-def api_get_team_task(team_id: str, task_id: str) -> str:
-    """Get the status/result of an A2A team task."""
-    return _get(f"/a2a/teams/{team_id}/tasks/{task_id}")
+def api_slack_post_event(payload: str) -> str:
+    """Post a Slack event to the AgentOS Slack interface webhook endpoint.
+    payload must be a JSON string matching the Slack Events API payload format.
+    Use for testing the Slack integration or replaying events."""
+    try:
+        body = json.loads(payload)
+    except Exception:
+        return f"Error: payload must be valid JSON, got: {payload}"
+    return _post("/slack/events", body)
+
+
+# ===========================================================================
+# WHATSAPP INTERFACE  (/whatsapp prefix — active only when WA tokens are set)
+# ===========================================================================
+
+@tool
+def api_whatsapp_status() -> str:
+    """Check whether the WhatsApp interface is active and healthy."""
+    return _get("/whatsapp/status")
 
 
 @tool
-def api_cancel_agent_task(agent_id: str, task_id: str) -> str:
-    """Cancel an in-progress A2A agent task."""
-    return _delete(f"/a2a/agents/{agent_id}/tasks/{task_id}")
+def api_whatsapp_verify_webhook(
+    hub_mode: str,
+    hub_verify_token: str,
+    hub_challenge: str,
+) -> str:
+    """Perform the WhatsApp webhook verification challenge-response flow.
+    hub_mode should be 'subscribe', hub_verify_token is the token you set in Meta,
+    hub_challenge is any string — the server echoes it back on success."""
+    return _get("/whatsapp/webhook",
+                **{"hub.mode": hub_mode, "hub.verify_token": hub_verify_token,
+                   "hub.challenge": hub_challenge})
 
 
 @tool
-def api_cancel_team_task(team_id: str, task_id: str) -> str:
-    """Cancel an in-progress A2A team task."""
-    return _delete(f"/a2a/teams/{team_id}/tasks/{task_id}")
+def api_whatsapp_post_webhook(payload: str) -> str:
+    """Post a WhatsApp webhook event to the AgentOS WhatsApp interface.
+    payload must be a JSON string in the Meta WhatsApp Business API webhook format.
+    Use for testing the WhatsApp integration or replaying events."""
+    try:
+        body = json.loads(payload)
+    except Exception:
+        return f"Error: payload must be valid JSON, got: {payload}"
+    return _post("/whatsapp/webhook", body)
 
 
 # ===========================================================================
@@ -1176,17 +1299,28 @@ AGENTOS_API_TOOLS = [
     api_get_trace_statistics,
     api_search_traces,
     api_get_trace_filter_schema,
-    # A2A
+    # A2A — Discovery
     api_get_agent_card,
     api_get_team_card,
     api_get_workflow_card,
-    api_a2a_run_agent,
-    api_a2a_run_team,
-    api_a2a_run_workflow,
-    api_get_agent_task,
-    api_get_team_task,
-    api_cancel_agent_task,
-    api_cancel_team_task,
+    # A2A — Agents (v1 JSON-RPC)
+    api_a2a_send_agent_message,
+    api_a2a_get_agent_task,
+    api_a2a_cancel_agent_task,
+    # A2A — Teams (v1 JSON-RPC)
+    api_a2a_send_team_message,
+    api_a2a_get_team_task,
+    api_a2a_cancel_team_task,
+    # A2A — Workflows (v1 JSON-RPC)
+    api_a2a_send_workflow_message,
+    # A2A — Legacy
+    api_a2a_legacy_send,
+    # Slack Interface
+    api_slack_post_event,
+    # WhatsApp Interface
+    api_whatsapp_status,
+    api_whatsapp_verify_webhook,
+    api_whatsapp_post_webhook,
     # Components
     api_list_components,
     api_get_component,

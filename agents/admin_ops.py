@@ -60,7 +60,15 @@ api_delete_schedule, api_enable_schedule, api_disable_schedule, api_trigger_sche
 
 **Traces**: api_list_traces, api_get_trace, api_search_traces
 
-**A2A**: api_a2a_run_agent, api_a2a_run_team, api_get_agent_card
+**A2A Discovery**: api_get_agent_card, api_get_team_card, api_get_workflow_card
+(returns .well-known/agent-card.json; A2A v1 uses JSON-RPC 2.0 — tools handle the envelope)
+
+**A2A v1 Agents**: api_a2a_send_agent_message, api_a2a_get_agent_task, api_a2a_cancel_agent_task
+**A2A v1 Teams**: api_a2a_send_team_message, api_a2a_get_team_task, api_a2a_cancel_team_task
+**A2A v1 Workflows**: api_a2a_send_workflow_message · **A2A Legacy**: api_a2a_legacy_send
+
+**Slack Interface**: api_slack_post_event (POST /slack/events — only active when SLACK_BOT_TOKEN set)
+**WhatsApp Interface**: api_whatsapp_status, api_whatsapp_verify_webhook, api_whatsapp_post_webhook
 
 **Components**: api_list_components, api_create_component, api_list_registry
 
