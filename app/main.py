@@ -8,6 +8,7 @@ from os import getenv
 from pathlib import Path
 
 from agno.os import AgentOS
+from agno.os.config import AuthorizationConfig
 from agno.utils.log import log_info
 
 from agents.admin_ops import admin_ops
@@ -91,6 +92,7 @@ agent_os = AgentOS(
     scheduler_poll_interval=15,
     scheduler_base_url=scheduler_base_url,
     authorization=runtime_env == "prd",
+    authorization_config=AuthorizationConfig(jwks_file=getenv("JWT_JWKS_FILE")) if getenv("JWT_JWKS_FILE") else None,
     lifespan=lifespan,
     db=get_postgres_db(),
     registry=_registry,
