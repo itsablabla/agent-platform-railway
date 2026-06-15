@@ -13,7 +13,7 @@ openrouter_model() when constructing a custom agent.
 
 from agno.agent import Agent
 
-from app.settings import openrouter_model
+from app.settings import default_model
 from db import assistant_knowledge, get_postgres_db
 from agents.tools import ALL_MCP_TOOLS
 
@@ -21,7 +21,7 @@ from agents.tools import ALL_MCP_TOOLS
 openrouter_agent = Agent(
     id="openrouter",
     name="OpenRouter",
-    model=openrouter_model("moonshotai/kimi-k2.6"),
+    model=default_model(),
     db=get_postgres_db(),
     instructions="""\
 You are a helpful assistant powered by OpenRouter, which gives you access

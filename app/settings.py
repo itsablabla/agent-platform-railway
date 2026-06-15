@@ -44,7 +44,7 @@ GARZA_MODELS: list[str] = [
     "garzaauto",
 ]
 
-DEFAULT_GARZA_MODEL = "garzaauto"
+DEFAULT_GARZA_MODEL = "kimi-k2"
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 DEFAULT_OPENROUTER_MODEL = "anthropic/claude-sonnet-4-5"
