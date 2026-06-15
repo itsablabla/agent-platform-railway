@@ -171,12 +171,12 @@ sequential_thinking_tools = MCPTools(
 # Shell execution (runs commands on the server process)
 # ---------------------------------------------------------------------------
 @tool
-def shell_execute(command: str, timeout: int = 60) -> str:
+def shell_execute(command: str, timeout: int = 0) -> str:
     """Run a shell command on the server and return stdout + stderr.
 
     Args:
         command: Shell command to execute (runs via /bin/sh -c).
-        timeout: Maximum seconds to wait (default 60).
+        timeout: Max seconds to wait. 0 (default) means no timeout — run forever.
     """
     import subprocess
 
@@ -186,7 +186,7 @@ def shell_execute(command: str, timeout: int = 60) -> str:
             shell=True,
             capture_output=True,
             text=True,
-            timeout=timeout,
+            timeout=timeout if timeout > 0 else None,
         )
         out = result.stdout.strip()
         err = result.stderr.strip()
