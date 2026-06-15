@@ -14,7 +14,7 @@ from agno.tools import tool
 from app.settings import openrouter_model
 from db import assistant_knowledge, get_postgres_db
 from agents.agentos_api import AGENTOS_API_TOOLS
-from agents.tools import composio_tools, e2b_tools, op_mcp_tools, sequential_thinking_tools, shell_execute, web_tools
+from agents.tools import composio_tools, e2b_tools, op_tools, sequential_thinking_tools, shell_execute, web_tools
 
 
 @approval
@@ -29,7 +29,7 @@ admin_ops = Agent(
     name="Agno IT Admin",
     model=openrouter_model("moonshotai/kimi-k2.6"),
     db=get_postgres_db(),
-    tools=[delete_resource, web_tools, shell_execute, op_mcp_tools, sequential_thinking_tools, *AGENTOS_API_TOOLS, composio_tools, e2b_tools],
+    tools=[delete_resource, web_tools, shell_execute, sequential_thinking_tools, *op_tools, *AGENTOS_API_TOOLS, composio_tools, e2b_tools],
     instructions="""\
 You are AdminOps — an execution-first system agent. When the user asks you to do something, DO IT. Never just explain how to do it — use your tools and show real output.
 

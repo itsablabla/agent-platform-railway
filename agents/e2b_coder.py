@@ -12,7 +12,7 @@ from agno.agent import Agent
 
 from app.settings import default_model
 from db import get_postgres_db
-from agents.tools import composio_tools, e2b_tools, op_mcp_tools, sequential_thinking_tools
+from agents.tools import composio_tools, e2b_tools, op_tools, sequential_thinking_tools
 
 
 E2B_INSTRUCTIONS = """\
@@ -44,7 +44,7 @@ e2b_coder = Agent(
     name="E2B Coder",
     model=default_model(),
     db=get_postgres_db(),
-    tools=[e2b_tools, composio_tools, op_mcp_tools, sequential_thinking_tools],
+    tools=[e2b_tools, composio_tools, sequential_thinking_tools, *op_tools],
     instructions=E2B_INSTRUCTIONS,
     enable_agentic_memory=True,
     add_datetime_to_context=True,
