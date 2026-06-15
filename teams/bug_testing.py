@@ -9,7 +9,7 @@ Members: WebSearch, CodeSearch, Log Analyst, Session Analyst,
 Security Agent, System Operator, Railway Agent, Agno IT Admin.
 """
 
-from agno.team import Team
+from agno.team import Team, TeamMode
 
 from agents.admin_ops import admin_ops
 from agents.code_search import code_search
@@ -26,7 +26,7 @@ from db import get_postgres_db
 bug_testing_team = Team(
     name="Bug Testing Team",
     description="End-to-end bug testing: reproduce, diagnose, root-cause, and verify fixes.",
-    mode="coordinate",
+    mode=TeamMode.coordinate,
     model=default_model(),
     members=[
         admin_ops,
