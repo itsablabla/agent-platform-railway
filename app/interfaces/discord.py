@@ -77,6 +77,7 @@ def _send_followup(app_id: str, interaction_token: str, content: str, bot_token:
 
 class Discord:
     type = "discord"
+    version = "1"
 
     def __init__(
         self,

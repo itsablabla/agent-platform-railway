@@ -42,6 +42,7 @@ def _split(text: str, limit: int = 4096) -> List[str]:
 
 class Telegram:
     type = "telegram"
+    version = "1"
 
     def __init__(
         self,
