@@ -47,10 +47,10 @@ GARZA_MODELS: list[str] = [
 DEFAULT_GARZA_MODEL = "kimi-k2"
 
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
-DEFAULT_OPENROUTER_MODEL = "anthropic/claude-sonnet-4-5"
+DEFAULT_OPENROUTER_MODEL = "moonshotai/kimi-k2.6"
 
 
-def default_model(model_id: str | None = None) -> OpenAIChat:
+def default_model(model_id: str | None = None) -> OpenAILike:
     """Return a fresh model instance per agent — avoids shared-state footguns.
 
     Resolution order for the model id:
@@ -58,11 +58,11 @@ def default_model(model_id: str | None = None) -> OpenAIChat:
       2. ``GARZA_MODEL`` env var
       3. ``DEFAULT_GARZA_MODEL`` constant
     """
-    chosen = model_id or getenv("GARZA_MODEL") or DEFAULT_GARZA_MODEL
-    return OpenAIChat(
+    chosen = model_id or getenv("OPENROUTER_MODEL") or DEFAULT_OPENROUTER_MODEL
+    return OpenAILike(
         id=chosen,
-        api_key=getenv("OPENAI_API_KEY"),
-        base_url=getenv("OPENAI_BASE_URL"),
+        api_key=getenv("OPENROUTER_API_KEY"),
+        base_url=OPENROUTER_BASE_URL,
         timeout=300,
     )
 
