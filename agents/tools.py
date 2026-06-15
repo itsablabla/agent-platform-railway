@@ -92,6 +92,18 @@ op_tools = [op_generate_password, op_vault_list, op_password_read]
 
 
 # ---------------------------------------------------------------------------
+# 1Password MCP (op mcp stdio — requires OP_SERVICE_ACCOUNT_TOKEN env var)
+# ---------------------------------------------------------------------------
+_OP_TOKEN = getenv("OP_SERVICE_ACCOUNT_TOKEN", "")
+
+op_mcp_tools = MCPTools(
+    command="op mcp",
+    transport="stdio",
+    env={"OP_SERVICE_ACCOUNT_TOKEN": _OP_TOKEN} if _OP_TOKEN else None,
+)
+
+
+# ---------------------------------------------------------------------------
 # Shell execution (runs commands on the server process)
 # ---------------------------------------------------------------------------
 @tool
@@ -131,4 +143,4 @@ def shell_execute(command: str, timeout: int = 60) -> str:
 # ---------------------------------------------------------------------------
 # Collection of all available toolkits
 # ---------------------------------------------------------------------------
-ALL_MCP_TOOLS = [web_tools, composio_tools, e2b_tools, *op_tools, shell_execute]
+ALL_MCP_TOOLS = [web_tools, composio_tools, e2b_tools, op_mcp_tools, *op_tools, shell_execute]
