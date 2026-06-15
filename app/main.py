@@ -84,7 +84,7 @@ async def lifespan(app):  # type: ignore[no-untyped-def]
         engine = create_engine(db_url)
         with engine.connect() as conn:
             row = conn.execute(
-                text("SELECT id, model_data FROM agno_team WHERE id = 'debug'")
+                text("SELECT id, model_data FROM teams WHERE id = 'debug'")
             ).fetchone()
             if row:
                 team_id, model_data = row
@@ -94,7 +94,7 @@ async def lifespan(app):  # type: ignore[no-untyped-def]
                     md["name"] = "OpenAILike"
                     md["provider"] = "OpenAI"
                     conn.execute(
-                        text("UPDATE agno_team SET model_data = :md WHERE id = :tid"),
+                        text("UPDATE teams SET model_data = :md WHERE id = :tid"),
                         {"md": json.dumps(md), "tid": team_id},
                     )
                     conn.commit()
