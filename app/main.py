@@ -31,6 +31,7 @@ from app.settings import build_openrouter_registry
 from db import get_postgres_db
 from db.url import db_url
 from teams.bug_testing import bug_testing_team
+from teams.debug_team import debug_team
 
 # ---------------------------------------------------------------------------
 # Environment
@@ -74,50 +75,6 @@ if getenv("DISCORD_PUBLIC_KEY") and getenv("DISCORD_BOT_TOKEN"):
 @asynccontextmanager
 async def lifespan(app):  # type: ignore[no-untyped-def]
     log_info("AgentOS lifespan: startup")
-
-    # ── One-shot migration: fix debug team model ──────────────────────────
-    # The debug team was created in Agno Studio with amazon/nova-pro-v1.
-    # Switch it to moonshotai/kimi-k2.6 so the user's runs actually work.
-    try:
-        import json
-        from sqlalchemy import create_engine, inspect as sa_inspect
-        engine = create_engine(db_url)
-        inspector = sa_inspect(engine)
-        all_tables = inspector.get_table_names()
-        # Search every table that has both id and model_data columns for the debug row
-        found = False
-        for table in all_tables:
-            cols = {c["name"] for c in inspector.get_columns(table)}
-            if not ("id" in cols and "model_data" in cols):
-                continue
-            with engine.connect() as conn:
-                row = conn.execute(
-                    text(f"SELECT id, model_data FROM {table} WHERE id = 'debug'")
-                ).fetchone()
-                if not row:
-                    continue
-                team_id, model_data = row
-                log_info(f"[migration] found debug team in {table}, model={model_data}")
-                md = json.loads(model_data) if isinstance(model_data, str) else (dict(model_data) if model_data else {})
-                if md.get("id") == "moonshotai/kimi-k2.6":
-                    log_info(f"[migration] debug team already on kimi-k2.6")
-                    found = True
-                    break
-                md["id"] = "moonshotai/kimi-k2.6"
-                md["name"] = "OpenAILike"
-                md["provider"] = "OpenAI"
-                conn.execute(
-                    text(f"UPDATE {table} SET model_data = :md WHERE id = :tid"),
-                    {"md": json.dumps(md), "tid": team_id},
-                )
-                conn.commit()
-                log_info(f"[migration] debug team model switched to moonshotai/kimi-k2.6 (table={table})")
-                found = True
-                break
-        if not found:
-            log_info("[migration] debug team not found in any table with id+model_data")
-    except Exception as exc:
-        log_info(f"[migration] debug team model migration skipped: {exc}")
 
     # Eagerly connect each MCP toolkit exactly once.
     # All agents share the same MCPTools object instances (defined in tools.py),
@@ -199,6 +156,7 @@ agent_os = AgentOS(
     ],
     teams=[
         bug_testing_team,
+        debug_team,
     ],
     interfaces=interfaces,
     config=str(Path(__file__).parent / "config.yaml"),
