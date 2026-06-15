@@ -56,8 +56,8 @@ class Telegram:
         self.team = team
         self.prefix = prefix
         self.tags = tags or ["Telegram"]
-        self.bot_token = os.getenv("TELEGRAM_BOT_TOKEN", "")
-        self.secret = os.getenv("TELEGRAM_WEBHOOK_SECRET", "")
+        self.bot_token = os.getenv("TELEGRAM_BOT_TOKEN") or os.getenv("TELEGRAM_TOKEN", "")
+        self.secret = os.getenv("TELEGRAM_WEBHOOK_SECRET") or os.getenv("TELEGRAM_WEBHOOK_SECRET_TOKEN", "")
 
     async def register_webhook(self, webhook_url: str) -> dict:
         """Register webhook URL with Telegram. Call once after startup."""

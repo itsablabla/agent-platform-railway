@@ -56,7 +56,7 @@ if SLACK_BOT_TOKEN and SLACK_SIGNING_SECRET:
         )
     )
 
-if getenv("TELEGRAM_BOT_TOKEN"):
+if getenv("TELEGRAM_BOT_TOKEN") or getenv("TELEGRAM_TOKEN"):
     interfaces.append(Telegram(agent=jada))
 
 if getenv("DISCORD_PUBLIC_KEY") and getenv("DISCORD_BOT_TOKEN"):
@@ -95,6 +95,18 @@ async def lifespan(app):  # type: ignore[no-untyped-def]
                     log_info(f"MCP connected: {getattr(toolkit, 'name', toolkit.__class__.__name__)}")
                 except Exception as exc:
                     log_info(f"MCP skipped: {getattr(toolkit, 'name', toolkit.__class__.__name__)} — {exc}")
+
+    # Auto-register Telegram webhook now that the server is up.
+    # Uses AGENTOS_URL (the public Railway domain) as the base.
+    public_url = getenv("AGENTOS_URL", "").rstrip("/")
+    if public_url:
+        for iface in interfaces:
+            if hasattr(iface, "register_webhook") and getattr(iface, "type", "") == "telegram":
+                try:
+                    result = await iface.register_webhook(f"{public_url}/telegram/webhook")
+                    log_info(f"Telegram webhook registered: {result}")
+                except Exception as exc:
+                    log_info(f"Telegram webhook registration failed: {exc}")
 
     try:
         yield
