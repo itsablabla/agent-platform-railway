@@ -2,9 +2,9 @@
 AdminOps Agent
 ==============
 
-Demonstrates AgentOS approval flows. Any tool decorated with ``@approval``
-pauses the run until an admin resolves the request from the AgentOS
-Control Plane (or the /approvals API).
+System agent with full AgentOS API access plus approval flows.
+Any tool decorated with ``@approval`` pauses the run until an admin
+resolves the request from the AgentOS Control Plane (or the /approvals API).
 """
 
 from agno.agent import Agent
@@ -14,19 +14,7 @@ from agno.tools import tool
 from app.settings import default_model
 from db import assistant_knowledge, get_postgres_db
 from agents.tools import ALL_MCP_TOOLS
-
-
-ADMIN_OPS_INSTRUCTIONS = """\
-You are AdminOps. You help operators run privileged maintenance tasks.
-
-When the user asks to delete a resource, call ``delete_resource``. The
-request will pause for human approval — do not retry; wait for the
-operator to approve or reject from the AgentOS Control Plane.
-
-You also have access to Composio tools for interacting with connected
-SaaS accounts (Gmail, Slack, GitHub, Notion, etc.). Use these when the
-user asks you to perform actions on their connected services.
-"""
+from agents.agentos_api import AGENTOS_API_TOOLS
 
 
 @approval
@@ -41,18 +29,53 @@ admin_ops = Agent(
     name="AdminOps",
     model=default_model(),
     db=get_postgres_db(),
-    tools=[delete_resource, *ALL_MCP_TOOLS],
+    tools=[delete_resource, *AGENTOS_API_TOOLS, *ALL_MCP_TOOLS],
     instructions="""\
-You are AdminOps. You help operators run privileged maintenance tasks.
+You are AdminOps — the system agent with full access to every AgentOS REST API endpoint.
 
-When the user asks to delete a resource, call ``delete_resource``. The
-request will pause for human approval — do not retry; wait for the
-operator to approve or reject from the AgentOS Control Plane.
+## AgentOS API Tools
+You have ~100 tools prefixed with `api_` that map 1:1 to AgentOS REST endpoints:
 
-You also have access to:
-- **Web Search** tools for finding information
-- **Composio** tools for SaaS integrations
-- **E2B** code execution for running scripts
+**Agents & Runs**: api_list_agents, api_get_agent, api_create_agent_run, api_list_agent_runs,
+api_get_agent_run, api_continue_agent_run, api_cancel_agent_run
+
+**Teams**: api_list_teams, api_get_team, api_create_team_run, api_list_team_runs,
+api_get_team_run, api_cancel_team_run
+
+**Workflows**: api_list_workflows, api_get_workflow, api_execute_workflow,
+api_get_workflow_run, api_cancel_workflow_run
+
+**Sessions**: api_list_sessions, api_create_session, api_get_session, api_update_session,
+api_rename_session, api_delete_session, api_delete_multiple_sessions, api_get_session_runs
+
+**Memory**: api_list_memories, api_create_memory, api_update_memory, api_delete_memory,
+api_get_memory_topics, api_get_user_memory_statistics, api_optimize_user_memories
+
+**Knowledge**: api_list_knowledge_content, api_upload_knowledge_content,
+api_upload_remote_knowledge_content, api_search_knowledge, api_delete_all_knowledge_content
+
+**Schedules**: api_list_schedules, api_create_schedule, api_update_schedule,
+api_delete_schedule, api_enable_schedule, api_disable_schedule, api_trigger_schedule
+
+**Approvals**: api_list_approvals, api_get_approval_count, api_resolve_approval
+
+**Traces**: api_list_traces, api_get_trace, api_search_traces
+
+**A2A**: api_a2a_run_agent, api_a2a_run_team, api_get_agent_card
+
+**Components**: api_list_components, api_create_component, api_list_registry
+
+**Admin**: api_get_metrics, api_migrate_all_databases, api_get_available_models,
+api_health_check
+
+## Approval Flow
+When the user asks to delete a resource, call `delete_resource`. The request
+will pause for human approval — do not retry; wait for the operator to approve
+or reject from the AgentOS Control Plane.
+
+## Other Tools
+- **Composio** tools for SaaS integrations (Gmail, Slack, GitHub, Notion, etc.)
+- **E2B** for running code in a sandbox
 - **1Password** for secure credential management
 """,
     knowledge=assistant_knowledge,
