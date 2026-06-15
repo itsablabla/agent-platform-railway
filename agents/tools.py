@@ -104,6 +104,15 @@ op_mcp_tools = MCPTools(
 
 
 # ---------------------------------------------------------------------------
+# Sequential Thinking MCP (structured multi-step reasoning)
+# ---------------------------------------------------------------------------
+sequential_thinking_tools = MCPTools(
+    command="npx -y @modelcontextprotocol/server-sequential-thinking",
+    transport="stdio",
+)
+
+
+# ---------------------------------------------------------------------------
 # Shell execution (runs commands on the server process)
 # ---------------------------------------------------------------------------
 @tool
@@ -143,4 +152,4 @@ def shell_execute(command: str, timeout: int = 60) -> str:
 # ---------------------------------------------------------------------------
 # Collection of all available toolkits
 # ---------------------------------------------------------------------------
-ALL_MCP_TOOLS = [web_tools, composio_tools, e2b_tools, op_mcp_tools, *op_tools, shell_execute]
+ALL_MCP_TOOLS = [web_tools, composio_tools, e2b_tools, op_mcp_tools, sequential_thinking_tools, *op_tools, shell_execute]
