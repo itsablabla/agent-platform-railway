@@ -38,27 +38,27 @@ def _r(resp: httpx.Response) -> str:
 
 def _get(path: str, **params) -> str:
     p = {k: v for k, v in params.items() if v is not None}
-    return _r(httpx.get(f"{_BASE}{path}", params=p or None, headers=_h(), timeout=30))
+    return _r(httpx.get(f"{_BASE}{path}", params=p or None, headers=_h(), timeout=None))
 
 
 def _post(path: str, body: dict | None = None) -> str:
     b = {k: v for k, v in (body or {}).items() if v is not None}
-    return _r(httpx.post(f"{_BASE}{path}", json=b or None, headers=_h(), timeout=60))
+    return _r(httpx.post(f"{_BASE}{path}", json=b or None, headers=_h(), timeout=None))
 
 
 def _put(path: str, body: dict | None = None) -> str:
     b = {k: v for k, v in (body or {}).items() if v is not None}
-    return _r(httpx.put(f"{_BASE}{path}", json=b or None, headers=_h(), timeout=30))
+    return _r(httpx.put(f"{_BASE}{path}", json=b or None, headers=_h(), timeout=None))
 
 
 def _patch(path: str, body: dict | None = None) -> str:
     b = {k: v for k, v in (body or {}).items() if v is not None}
-    return _r(httpx.patch(f"{_BASE}{path}", json=b or None, headers=_h(), timeout=30))
+    return _r(httpx.patch(f"{_BASE}{path}", json=b or None, headers=_h(), timeout=None))
 
 
 def _delete(path: str, body: dict | None = None) -> str:
     b = {k: v for k, v in (body or {}).items() if v is not None}
-    req = httpx.delete(f"{_BASE}{path}", json=b or None, headers=_h(), timeout=30)
+    req = httpx.delete(f"{_BASE}{path}", json=b or None, headers=_h(), timeout=None)
     return _r(req)
 
 

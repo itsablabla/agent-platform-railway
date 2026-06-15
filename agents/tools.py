@@ -32,6 +32,7 @@ _WEB_SEARCH_MCP_URL = "https://search.parallel.ai/mcp"
 web_tools = MCPTools(
     url=_WEB_SEARCH_MCP_URL,
     transport="streamable-http",
+    timeout_seconds=86400,
 )
 
 # ---------------------------------------------------------------------------
@@ -43,6 +44,7 @@ _COMPOSIO_API_KEY = getenv("COMPOSIO_API_KEY", "")
 composio_tools = MCPTools(
     url=_COMPOSIO_MCP_URL,
     transport="streamable-http",
+    timeout_seconds=86400,
     server_params=StreamableHTTPClientParams(
         url=_COMPOSIO_MCP_URL,
         headers={"x-consumer-api-key": _COMPOSIO_API_KEY} if _COMPOSIO_API_KEY else None,
@@ -56,6 +58,7 @@ composio_tools = MCPTools(
 e2b_tools = MCPTools(
     command="npx -y @e2b/mcp-server",
     transport="stdio",
+    timeout_seconds=86400,
     env={"E2B_API_KEY": getenv("E2B_API_KEY", "")} if getenv("E2B_API_KEY") else None,
 )
 
@@ -69,11 +72,11 @@ def _op_env() -> dict:
     return {**os.environ, "OP_SERVICE_ACCOUNT_TOKEN": token} if token else dict(os.environ)
 
 
-def _op_run(*args: str, timeout: int = 15) -> str:
+def _op_run(*args: str) -> str:
     import subprocess
     result = subprocess.run(
         ["op", *args],
-        capture_output=True, text=True, env=_op_env(), timeout=timeout,
+        capture_output=True, text=True, env=_op_env(),
     )
     if result.returncode == 0:
         return result.stdout.strip() or "(success, no output)"
@@ -164,6 +167,7 @@ op_tools = [op_get_item, op_list_items, op_create_item, op_vault_list, op_genera
 sequential_thinking_tools = MCPTools(
     command="npx -y @modelcontextprotocol/server-sequential-thinking",
     transport="stdio",
+    timeout_seconds=86400,
 )
 
 

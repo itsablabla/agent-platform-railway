@@ -29,7 +29,7 @@ _TG_API = "https://api.telegram.org/bot{token}/{method}"
 def _tg(token: str, method: str, **kwargs) -> dict:
     url = _TG_API.format(token=token, method=method)
     try:
-        r = httpx.post(url, json=kwargs, timeout=15)
+        r = httpx.post(url, json=kwargs, timeout=None)
         return r.json()
     except Exception as exc:
         log_error(f"Telegram API error ({method}): {exc}")

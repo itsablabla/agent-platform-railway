@@ -66,11 +66,11 @@ def _send_followup(app_id: str, interaction_token: str, content: str, bot_token:
                     f"{_DISCORD_API}/webhooks/{app_id}/{interaction_token}/messages/@original",
                     headers=_discord_headers(bot_token),
                     json={"content": chunk},
-                    timeout=15,
+                    timeout=None,
                 )
             else:
                 httpx.post(url, headers=_discord_headers(bot_token),
-                           json={"content": chunk}, timeout=15)
+                           json={"content": chunk}, timeout=None)
         except Exception as exc:
             log_error(f"Discord followup error: {exc}")
 
