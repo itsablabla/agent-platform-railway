@@ -25,8 +25,8 @@ def delete_resource(resource_id: str) -> str:
 
 
 admin_ops = Agent(
-    id="admin-ops",
-    name="AdminOps",
+    id="agno-it-admin",
+    name="Agno IT Admin",
     model=default_model(),
     db=get_postgres_db(),
     tools=[delete_resource, *AGENTOS_API_TOOLS, *ALL_MCP_TOOLS],

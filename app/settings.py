@@ -79,11 +79,14 @@ def openrouter_model(model_id: str | None = None) -> OpenAILike:
 
 
 def build_openrouter_registry():
-    """Fetch all public OpenRouter models and return a pre-populated Registry.
+    """Build a Registry pre-populated with every available model.
 
-    The Registry is passed to AgentOS so every model appears in
-    GET /registry?resource_type=model without needing one agent per model.
-    Falls back to an empty Registry when the API is unreachable.
+    Includes:
+    - All Garza LLM Gateway models (OpenAIChat via OPENAI_BASE_URL)
+    - All public OpenRouter models (OpenAILike via openrouter.ai)
+
+    The Registry is passed to AgentOS so models appear in
+    GET /registry?resource_type=model and in the Studio model picker.
     """
     import json
     import urllib.request
@@ -91,24 +94,32 @@ def build_openrouter_registry():
     from agno.registry import Registry
     from agno.utils.log import log_info, log_warning
 
-    registry = Registry()
+    all_models: list = []
+
+    # Garza LLM Gateway models
+    for model_id in GARZA_MODELS:
+        all_models.append(default_model(model_id))
+    log_info(f"Registry: added {len(GARZA_MODELS)} Garza gateway models")
+
+    # OpenRouter models
     api_key = getenv("OPENROUTER_API_KEY", "")
     if not api_key:
         log_warning("OPENROUTER_API_KEY not set — skipping OpenRouter model discovery")
-        return registry
+    else:
+        try:
+            req = urllib.request.Request(
+                f"{OPENROUTER_BASE_URL}/models",
+                headers={"Authorization": f"Bearer {api_key}"},
+            )
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                data = json.loads(resp.read())
+            or_models = data.get("data", [])
+            for m in or_models:
+                all_models.append(openrouter_model(m["id"]))
+            log_info(f"Registry: added {len(or_models)} OpenRouter models")
+        except Exception as exc:
+            log_warning(f"OpenRouter model discovery failed: {exc}")
 
-    try:
-        req = urllib.request.Request(
-            f"{OPENROUTER_BASE_URL}/models",
-            headers={"Authorization": f"Bearer {api_key}"},
-        )
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            data = json.loads(resp.read())
-        models = data.get("data", [])
-        for m in models:
-            registry.add_model(openrouter_model(m["id"]))
-        log_info(f"OpenRouter: registered {len(models)} models in registry")
-    except Exception as exc:
-        log_warning(f"OpenRouter model discovery failed: {exc}")
-
+    registry = Registry(models=all_models)
+    log_info(f"Registry: {len(all_models)} total models registered")
     return registry
