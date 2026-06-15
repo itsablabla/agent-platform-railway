@@ -26,7 +26,7 @@ from agents.agentos_api import (
     MEMORY_TOOLS,
     KNOWLEDGE_TOOLS,
 )
-from agents.tools import composio_tools, sequential_thinking_tools, web_tools, shell_execute, op_tools
+from agents.tools import composio_tools, sequential_thinking_tools, web_tools, shell_execute, op_tools, A2A_NATIVE_TOOLS
 from app.settings import default_model
 from db import agentos_docs_knowledge, assistant_knowledge, get_postgres_db
 
@@ -51,9 +51,11 @@ implement details yourself — you delegate to the right agent and aggregate the
 ## How to Orchestrate
 1. Use `sequential_thinking` to break the task into steps before acting.
 2. Identify which specialist owns each step.
-3. Send messages to each agent via `api_a2a_send_agent_message`.
-4. Poll for task completion with `api_a2a_get_agent_task`.
-5. Aggregate results and synthesize a unified response.
+3. Send messages using the native A2A tools:
+   - `a2a_send(agent_id, message)` — synchronous, waits for full response (preferred)
+   - `a2a_stream(agent_id, message)` — streaming, returns full response when done
+   - `api_a2a_send_agent_message` — HTTP wrapper fallback if native call fails
+4. Aggregate results and synthesize a unified response.
 
 ## Direct Capabilities
 - Approve/reject pending approvals via APPROVAL_TOOLS.
@@ -81,6 +83,7 @@ system_operator = Agent(
         shell_execute,
         composio_tools,
         *op_tools,
+        *A2A_NATIVE_TOOLS,
         *A2A_TOOLS,
         *AGENT_RUN_TOOLS,
         *APPROVAL_TOOLS,

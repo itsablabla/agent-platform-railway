@@ -209,6 +209,76 @@ def shell_execute(command: str, timeout: int = 0) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Native A2A agent-to-agent communication (agno RemoteAgent + A2AClient)
+#
+# These tools use the agno-native A2A client (protocol="a2a") so agents talk
+# to each other via the proper A2A protocol rather than raw HTTP wrappers.
+# Base URL comes from AGENTOS_URL env (same host, different agent path).
+# ---------------------------------------------------------------------------
+
+@tool
+def a2a_send(agent_id: str, message: str) -> str:
+    """Send a message to another agent via the A2A protocol and return its response.
+
+    Args:
+        agent_id: The target agent's ID (e.g. 'railway-agent', 'security-agent').
+        message: The message to send.
+    """
+    import asyncio
+    from os import getenv
+    from agno.agent import RemoteAgent
+
+    base_url = getenv("AGENTOS_URL", "http://127.0.0.1:8000")
+    agent = RemoteAgent(base_url=base_url, agent_id=agent_id, protocol="a2a")
+
+    async def _run() -> str:
+        resp = await agent.arun(message)
+        return resp.content if resp else "(no response)"
+
+    try:
+        return asyncio.get_event_loop().run_until_complete(_run())
+    except RuntimeError:
+        return asyncio.run(_run())
+    except Exception as exc:
+        return f"[a2a error] {exc}"
+
+
+@tool
+def a2a_stream(agent_id: str, message: str) -> str:
+    """Stream a message to another agent via A2A and return the full response.
+
+    Args:
+        agent_id: The target agent's ID (e.g. 'session-analyst', 'log-analyst').
+        message: The message to send.
+    """
+    import asyncio
+    from os import getenv
+    from agno.client.a2a import A2AClient
+
+    base_url = getenv("AGENTOS_URL", "http://127.0.0.1:8000").rstrip("/")
+    url = f"{base_url}/a2a/agents/{agent_id}"
+    client = A2AClient(url)
+
+    async def _run() -> str:
+        chunks = []
+        async for event in client.stream_message(message=message):
+            if getattr(event, "is_content", False) and getattr(event, "content", None):
+                chunks.append(event.content)
+        return "".join(chunks) or "(no content)"
+
+    try:
+        return asyncio.get_event_loop().run_until_complete(_run())
+    except RuntimeError:
+        return asyncio.run(_run())
+    except Exception as exc:
+        return f"[a2a stream error] {exc}"
+
+
+# Expose as a list for easy import in agent files
+A2A_NATIVE_TOOLS = [a2a_send, a2a_stream]
+
+
+# ---------------------------------------------------------------------------
 # Collection of all available toolkits
 # ---------------------------------------------------------------------------
 ALL_MCP_TOOLS = [web_tools, composio_tools, e2b_tools, sequential_thinking_tools, *op_tools, shell_execute]
