@@ -80,27 +80,43 @@ async def lifespan(app):  # type: ignore[no-untyped-def]
     # Switch it to moonshotai/kimi-k2.6 so the user’s runs actually work.
     try:
         import json
-        from sqlalchemy import create_engine
+        from sqlalchemy import create_engine, inspect as sa_inspect
         engine = create_engine(db_url)
-        with engine.connect() as conn:
-            row = conn.execute(
-                text("SELECT id, model_data FROM teams WHERE id = 'debug'")
-            ).fetchone()
-            if row:
+        inspector = sa_inspect(engine)
+        all_tables = inspector.get_table_names()
+        log_info(f"[migration] all tables: {all_tables}")
+        team_tables = [t for t in all_tables if "team" in t.lower()]
+        log_info(f"[migration] team-related tables: {team_tables}")
+        candidates = ["agno_teams", "agno_team", "teams", "team", "os_teams"] + team_tables
+        found = False
+        for candidate in candidates:
+            if candidate not in all_tables:
+                continue
+            with engine.connect() as conn:
+                row = conn.execute(
+                    text(f"SELECT id, model_data FROM {candidate} WHERE id = 'debug'")
+                ).fetchone()
+                if not row:
+                    continue
                 team_id, model_data = row
                 md = json.loads(model_data) if isinstance(model_data, str) else (dict(model_data) if model_data else {})
-                if md.get("id") != "moonshotai/kimi-k2.6":
-                    md["id"] = "moonshotai/kimi-k2.6"
-                    md["name"] = "OpenAILike"
-                    md["provider"] = "OpenAI"
-                    conn.execute(
-                        text("UPDATE teams SET model_data = :md WHERE id = :tid"),
-                        {"md": json.dumps(md), "tid": team_id},
-                    )
-                    conn.commit()
-                    log_info("[migration] debug team model switched to moonshotai/kimi-k2.6")
-                else:
-                    log_info("[migration] debug team already on kimi-k2.6, skipping")
+                if md.get("id") == "moonshotai/kimi-k2.6":
+                    log_info(f"[migration] debug team already on kimi-k2.6 (table={candidate})")
+                    found = True
+                    break
+                md["id"] = "moonshotai/kimi-k2.6"
+                md["name"] = "OpenAILike"
+                md["provider"] = "OpenAI"
+                conn.execute(
+                    text(f"UPDATE {candidate} SET model_data = :md WHERE id = :tid"),
+                    {"md": json.dumps(md), "tid": team_id},
+                )
+                conn.commit()
+                log_info(f"[migration] debug team model switched to moonshotai/kimi-k2.6 (table={candidate})")
+                found = True
+                break
+        if not found:
+            log_info("[migration] debug team not found in any table")
     except Exception as exc:
         log_info(f"[migration] debug team model migration skipped: {exc}")
 
