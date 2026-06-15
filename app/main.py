@@ -67,17 +67,27 @@ if getenv("DISCORD_PUBLIC_KEY") and getenv("DISCORD_BOT_TOKEN"):
 @asynccontextmanager
 async def lifespan(app):  # type: ignore[no-untyped-def]
     log_info("AgentOS lifespan: startup")
-    
-    # Eagerly connect MCP toolkits so tools are ready immediately
-    for agent in [web_search, code_search, admin_ops, composio_agent, jada, claude_opus_agent, gpt55_agent, kimi_agent, openrouter_agent, e2b_coder]:
-        for tool in getattr(agent, "tools", []):
-            if tool and hasattr(tool, "connect") and callable(getattr(tool, "connect")):
+
+    # Eagerly connect each MCP toolkit exactly once.
+    # All agents share the same MCPTools object instances (defined in tools.py),
+    # so we deduplicate by object id to avoid spawning duplicate stdio processes
+    # or corrupting HTTP connection state — either of which causes
+    # "Failed to initialize MCP toolkit" on every subsequent run.
+    _connected: set[int] = set()
+    all_agents = [web_search, code_search, admin_ops, composio_agent, jada,
+                  claude_opus_agent, gpt55_agent, kimi_agent, openrouter_agent, e2b_coder]
+    for agent in all_agents:
+        for toolkit in getattr(agent, "tools", []):
+            if toolkit is None or id(toolkit) in _connected:
+                continue
+            if hasattr(toolkit, "connect") and callable(toolkit.connect):
+                _connected.add(id(toolkit))
                 try:
-                    await tool.connect()
-                    log_info(f"MCP connected: {getattr(tool, 'name', tool.__class__.__name__)}")
-                except Exception as e:
-                    log_info(f"MCP skipped: {getattr(tool, 'name', tool.__class__.__name__)} — {e}")
-    
+                    await toolkit.connect()
+                    log_info(f"MCP connected: {getattr(toolkit, 'name', toolkit.__class__.__name__)}")
+                except Exception as exc:
+                    log_info(f"MCP skipped: {getattr(toolkit, 'name', toolkit.__class__.__name__)} — {exc}")
+
     try:
         yield
     finally:
